@@ -1,13 +1,24 @@
 #ifndef __CLIENT__
 #define __CLIENT__
 
+#include <string>
+
 class Client 
 {
 public:
-	Client();
+	Client(int fd);
 	virtual ~CLient();
-private:
 
+	void disconnected();
+	char* getBuff();
+	int process();
+
+private:
+	void sendData(char* data);
+
+private:
+	char Buff[2048];
+	int Fd;
 };
 
 #endif

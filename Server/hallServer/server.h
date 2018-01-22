@@ -12,13 +12,13 @@ public:
 	Server();
 	virtual ~Server();
 
-	bool createServer();
+	bool createServer(const char* ip, int port);
 	void run();
 
 private:
 	int epollLoop();
-	int setNoblock();
-	void ctlEvent();
+	int setNoblock(int fd);
+	void ctlEvent(int fd, bool flag);
 
 private:
 	int Epoolfd;
