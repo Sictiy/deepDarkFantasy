@@ -6,6 +6,7 @@
 
 #include <sys/socket.h>
 #include <sys/epoll.h>
+#include <glog/logging.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <netinet/in.h>
@@ -32,13 +33,16 @@ public:
 	Server();
 	virtual ~Server();
 
-	bool createServer(const char* ip, int port);
+	bool init();
 	void run();
 
 private:
 	int epollLoop();
+	bool createServer(const char* ip, int port);
 	int setNoblock(int fd);
 	void ctlEvent(int fd, bool flag);
+	void setLog();
+	void setDaemon();
 
 private:
 	int Epoolfd;

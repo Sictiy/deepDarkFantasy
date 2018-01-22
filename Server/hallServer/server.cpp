@@ -4,7 +4,7 @@
 bool loop = true;
 void sig_handler( int sig )
 {
-    if ( sig == SIGINT)
+    if ( sig == SIGINT ||sig == SIGQUIT||sig == SIGTERM)
     {
         loop = false;
     }
@@ -34,7 +34,17 @@ Server::~Server(){
 	}
 
 	ClientMap.clear();
-	//dispose db
+	std::cout << "close server!"<<std::endl;
+	google::ShutdownGoogleLogging();
+}
+
+bool Server::init(){
+	if(createServer("0.0.0.0",SERVERPORT)){
+		setLog();
+		setDaemon();
+		return true;
+	}
+	return false;
 }
 
 bool Server::createServer(const char* ip, int port){
@@ -154,10 +164,24 @@ int Server::setNoblock(int fd){
 }
 
 void Server::run(){
-	signal(SIGINT, sig_handler);
+	std::cout << "server is runing!" <<std::endl;
 	Thread = new std::thread(&Server::epollLoop, this);
 	Thread->detach();
 	while(loop){
 		sleep(100);
 	}
+}
+
+void Server::setLog(){
+	
+}
+
+void Server::setDaemon(){
+	if(-1==daemon(0,0)){
+		std::cout << "daemon erro!" << std::endl;
+		exit(1);
+	}
+	signal(SIGINT, sig_handler);
+	signal(SIGTERM, sig_handler);
+	signal(SIGQUIT, sig_handler);
 }
