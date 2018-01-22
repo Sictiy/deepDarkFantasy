@@ -1,17 +1,29 @@
 #ifndef __CLIENT__
 #define __CLIENT__
 
-#include <string>
+
+#include <sys/socket.h>
+#include <sys/epoll.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <stdio.h>
+#include <iostream>
+#include <thread>
+#include <map>
+
 
 class Client 
 {
 public:
 	Client(int fd);
-	virtual ~CLient();
+	virtual ~Client();
 
 	void disconnected();
 	char* getBuff();
-	int process();
+	void process();
 
 private:
 	void sendData(char* data);

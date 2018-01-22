@@ -1,6 +1,15 @@
 #include "server.h"
-#include "dbmgr.h"
-#include "client.h"
+
+/*******************************************/
+bool loop = true;
+void sig_handler( int sig )
+{
+    if ( sig == SIGINT)
+    {
+        loop = false;
+    }
+}
+/*******************************************/
 
 Server::Server():
 	Epoolfd(0),
@@ -17,6 +26,7 @@ Server::~Server(){
 		Thread->join();
 	}
 	delete Thread;
+	close(Listenfd);
 
 	for(auto iterator:ClientMap){
 		close(iterator.first);
@@ -32,7 +42,7 @@ bool Server::createServer(const char* ip, int port){
 
 	Listenfd = socket(AF_INET, SOCK_STREAM, 0);
 	if(Listenfd == -1){
-		std::cout << "create socket failed"<<endl;
+		std::cout << "create socket failed"<<std::endl;
 	}
 
 	if (ip[0] != '\0')
@@ -49,18 +59,18 @@ bool Server::createServer(const char* ip, int port){
 	server_addr.sin_port = htons(port);
 
 	if(-1 == bind(Listenfd, (struct sockaddr*)(&server_addr), sizeof(server_addr))){
-		std::cout << " bind socket failed"<<endl;
+		std::cout << " bind socket failed"<<std::endl;
 		return false;
 	}
 
 	if(-1 == listen(Listenfd, 8)){
-		std::cout << " listen socket failed"<<endl;
+		std::cout << " listen socket failed"<<std::endl;
 		return false;
 	}
 
 	Epoolfd = epoll_create(MAXEVENTSIZE);
-	ctlEvent(listenfd_, true);
-	std::cout << " CreateServer:"<<ip<<port<<"Success!"<<endl;
+	ctlEvent(Listenfd, true);
+	std::cout << " CreateServer:"<<ip<<":"<<port<<" Success!"<<std::endl;
 
 	return true;
 }
@@ -69,18 +79,18 @@ void Server::ctlEvent(int fd, bool flag){
 	struct epoll_event ev;
 	ev.data.fd = fd;
 	ev.events = flag ? EPOLLIN : 0;
-	epoll_ctl(epollfd_, flag ? EPOLL_CTL_ADD : EPOLL_CTL_DEL, fd, &ev);
+	epoll_ctl(Epoolfd, flag ? EPOLL_CTL_ADD : EPOLL_CTL_DEL, fd, &ev);
 	if(flag){
-		set_noblock(fd);
+		setNoblock(fd);
 		ClientMap[fd] = new Client(fd);
 		if(fd != Listenfd)
-			std::cout << fd << "add to loop." << endl;
+			std::cout << fd << " add to loop." << std::endl;
 	}
 	else{
 		close(fd);
 		delete ClientMap[fd];
 		ClientMap.erase(fd);
-		std::cout << fd << "exit from loop." << endl;
+		std::cout << fd << "exit from loop." << std::endl;
 	}
 }
 
@@ -95,13 +105,13 @@ int Server::epollLoop(){
 	int bufflen = 0;
 	struct epoll_event events[MAXEVENTSIZE];
 	while(true){
-		nfds = epoll_wait(epollfd_, events, MAXEVENTSIZE, TIMEWAIT);
+		nfds = epoll_wait(Epoolfd, events, MAXEVENTSIZE, TIMEWAIT);
 		for(int i = 0; i < nfds; i++){
 			if(events[i].data.fd == Listenfd){
 				fd = accept(Listenfd, (struct sockaddr*)&client_addr, &client_len);
-				ctl_event(fd, true);
+				ctlEvent(fd, true);
 				char ipAddress[INET_ADDRSTRLEN];
-				std::cout << "accept connection from :"<<inet_ntop(AF_INET, &client_addr.sin_addr, ipAddress, sizeof(ipAddress))<<":"<<ntohs(client_addr.sin_port))<< endl;
+				std::cout << "accept connection from :"<<inet_ntop(AF_INET, &client_addr.sin_addr, ipAddress, sizeof(ipAddress))<<":"<<ntohs(client_addr.sin_port)<< std::endl;
 			}
 			else if(events[i].events & EPOLLIN){
 				if((fd == events[i].data.fd) < 0) 
@@ -112,11 +122,12 @@ int Server::epollLoop(){
 					continue;
 
 				memset(client->getBuff(), 0, (size_t)1024);
-				if((bufflen = read(fd, client->getBuff(), BUFFLEN)) <= 0 ) {
-					ctl_event(fd, false);
+				if((bufflen = read(fd, client->getBuff(), BUFFLEN)) <= 2 ) {
+					ctlEvent(fd, false);
 					client->disconnected();
 				}
 				else{
+					std::cout <<"bufflen:"<< bufflen <<std::endl;
 					client->process();
 				}
 			}
@@ -125,17 +136,17 @@ int Server::epollLoop(){
 		steady_clock::time_point tpNow = steady_clock::now();
         milliseconds dur = duration_cast<milliseconds>(tpNow - tpBegin);
 
-        if (dur.count() * 30 < m_nFrame * 1000)
+        if (dur.count() * 30 < Frame * 1000)
         {
             std::this_thread::sleep_for(milliseconds(8));
             continue;
         }
 
-        m_nFrame++;
+        Frame++;
 	}
 }
 
-int Server::serNoBlock(int fd){
+int Server::setNoblock(int fd){
 	int flags;
 	if((flags == fcntl(fd, F_GETFL, 0)) == -1) 
 		flags = 0;
@@ -143,6 +154,10 @@ int Server::serNoBlock(int fd){
 }
 
 void Server::run(){
-	thread_ = new std::thread(&Server::epoolLoop, this);
-	thread_->detach();
+	signal(SIGINT, sig_handler);
+	Thread = new std::thread(&Server::epollLoop, this);
+	Thread->detach();
+	while(loop){
+		sleep(100);
+	}
 }

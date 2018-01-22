@@ -1,7 +1,8 @@
 #include "client.h"
 
-Client::Client(fd):
-Fd(fd){
+Client::Client(int fd):
+Fd(fd)
+{
 
 }
 
@@ -9,20 +10,21 @@ Client::~Client(){
 
 }
 
-Client::disconnected(){
+void Client::disconnected(){
 	close(Fd);
 }
 
-CLient::process(){
+void Client::process(){
+	std::cout<<"BUFF:"<<Buff << std::endl;
 	sendData(Buff);
 }
 
-CLient::sendData(char * data){
+void Client::sendData(char * data){
 	std::string str("request:");
 	str.append(data);
 	write(Fd, str.c_str(), str.length());
 }
 
-Client::getBuff(){
+char* Client::getBuff(){
 	return Buff;
 }

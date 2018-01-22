@@ -1,8 +1,28 @@
 #ifndef __SERVER__
 #define __SERVER__
 
+#include "dbmgr.h"
+#include "client.h"
+
+#include <sys/socket.h>
+#include <sys/epoll.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <pthread.h>
+#include <string.h>
+#include <stdio.h>
+#include <csignal>
+#include <iostream>
 #include <thread>
 #include <map>
+
+#define MAXEVENTSIZE  1024
+#define TIMEWAIT  1000
+#define BUFFLEN  2014
+#define SERVERPORT 5001
+
 
 class Client;
 
