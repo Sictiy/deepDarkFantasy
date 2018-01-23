@@ -10,10 +10,20 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <cstdlib>
 #include <iostream>
 #include <thread>
 #include <map>
+#include <vector>
+#include<algorithm>
 
+#define USESTRING true
+
+typedef struct roleData{
+	char name[20];
+	uint score;
+}RoleData;
 
 class Client 
 {
@@ -26,11 +36,14 @@ public:
 	void process();
 
 private:
-	void sendData(char* data);
+	void sendData(std::string data);
+	void processRequest();
+	void responseByString();
 
 private:
 	char Buff[2048];
 	int Fd;
+	std::vector<RoleData> RoleDataList;
 };
 
 #endif

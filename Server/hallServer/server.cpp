@@ -131,7 +131,7 @@ int Server::epollLoop(){
 					continue;
 
 				memset(client->getBuff(), 0, (size_t)1024);
-				if((bufflen = read(fd, client->getBuff(), BUFFLEN)) <= 2 ) {
+				if((bufflen = read(fd, client->getBuff(), BUFFLEN)) <= 1 ) {
 					ctlEvent(fd, false);
 					client->disconnected();
 				}
@@ -172,7 +172,9 @@ void Server::run(){
 }
 
 void Server::setLog(){
-	
+	signal(SIGINT, sig_handler);
+	signal(SIGTERM, sig_handler);
+	signal(SIGQUIT, sig_handler);
 }
 
 void Server::setDaemon(){

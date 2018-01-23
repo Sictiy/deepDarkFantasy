@@ -40,7 +40,13 @@ int run(int socketfd){
     char buff[2048];
     bool looping = true;
     while(looping){
+        bzero(buff,strlen(buff));
         std::cin >> buff;
+        if(strlen(buff)==1){
+            looping = false;
+            close(socketfd);
+            break;
+        } 
         int n = send(socketfd,buff,strlen(buff),0);
         std::cout <<"send:"<<buff <<" len:"<<strlen(buff)<< std::endl;
         bzero(buff,strlen(buff));
@@ -53,7 +59,8 @@ int run(int socketfd){
 }
 
 int main(){
-    int socketfd = connect("111.230.247.17",8080);
+    //int socketfd = connect("111.230.247.17",8080);
+    int socketfd = connect("127.0.0.1",8080);
     std::cout << "successfully connect to server! fd:" << socketfd << std::endl;
     if(socketfd >= 0){
         run(socketfd);
