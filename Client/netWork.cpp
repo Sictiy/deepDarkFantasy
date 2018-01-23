@@ -3,10 +3,13 @@
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <iostream>
+#include <string.h>
 
 #define EHCO_PORT    8080
 #define MAX_CLIENT_NUM        10
 
+using namespace std;
 int main()
 {
     int socketfd;
@@ -14,8 +17,8 @@ int main()
        
     if(socketfd == -1)
     {
-        printf("errno=%d ", errno);
-        exit(1);
+        cout << "new socket failed!" << endl;
+        return -1;
     }
     else
     {
@@ -32,8 +35,7 @@ int main()
     if(bind(socketfd, (struct sockaddr *)&sa, sizeof(sa))!= 0)
     {
         printf("bind failed ");
-        printf("errno=%d ", errno);
-        exit(1);
+        return -1;
     }
     else
     {
@@ -44,7 +46,7 @@ int main()
     if(listen(socketfd ,MAX_CLIENT_NUM) != 0)
     {
         printf("listen error ");
-        exit(1);
+        return -1;
     }
     else
     {
@@ -64,12 +66,13 @@ int main()
             printf("number of receive bytes = %d ", n);
             write(STDOUT_FILENO, buff, n);
             send(clientfd, buff, n, 0);
-            buff[n] = "";
-            if(strcmp(buff, "quit ") == 0)
+            buff[n] = '\0';
+	    //memcpy(buff+n,' ',1);	    
+            if(strcmp(buff, "quit") == 0)
             {
                 break;
             }
-            else if(strcmp(buff, "close ") == 0)
+            else if(strcmp(buff, "close") == 0)
             {
                 //server closing
                 closing = 1;
