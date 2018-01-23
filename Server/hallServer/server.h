@@ -22,7 +22,7 @@
 #define MAXEVENTSIZE  1024
 #define TIMEWAIT  1000
 #define BUFFLEN  2014
-#define SERVERPORT 5001
+#define SERVERPORT 8080
 
 
 class Client;

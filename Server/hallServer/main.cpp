@@ -7,8 +7,8 @@ int main(int argc, char* argv[]){
 	/*ofstream of("log.txt");
 	streambuf* fileBuf = of.rdbuf();
 	cout.rdbuf(fileBuf);*/
-	FLAGS_log_dir = "./"; 
-	google::InitGoogleLogging(argv[0]);
+	//FLAGS_log_dir = "$HOME/logs"; 
+	//google::InitGoogleLogging(argv[0]);
 
 	Server server;
 	if(server.init()){
@@ -16,7 +16,7 @@ int main(int argc, char* argv[]){
 		delete &server;
 	}
 
-	google::ShutdownGoogleLogging();
+	//google::ShutdownGoogleLogging();
 	/*of.flush();
 	of.close();*/
 	return 0;

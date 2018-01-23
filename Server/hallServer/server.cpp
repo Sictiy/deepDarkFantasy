@@ -35,13 +35,12 @@ Server::~Server(){
 
 	ClientMap.clear();
 	std::cout << "close server!"<<std::endl;
-	google::ShutdownGoogleLogging();
 }
 
 bool Server::init(){
 	if(createServer("0.0.0.0",SERVERPORT)){
 		setLog();
-		setDaemon();
+		//setDaemon();
 		return true;
 	}
 	return false;
