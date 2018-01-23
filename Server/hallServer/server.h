@@ -6,7 +6,7 @@
 
 #include <sys/socket.h>
 #include <sys/epoll.h>
-#include <glog/logging.h>
+//#include <glog/logging.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <netinet/in.h>
