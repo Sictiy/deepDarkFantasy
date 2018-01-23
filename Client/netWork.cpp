@@ -5,86 +5,60 @@
 #include <unistd.h>
 #include <iostream>
 #include <string.h>
-
-#define EHCO_PORT    8080
-#define MAX_CLIENT_NUM        10
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <stdlib.h>
 
 using namespace std;
-int main()
-{
+int connect(const char * host,int port){
     int socketfd;
     socketfd = socket(AF_INET, SOCK_STREAM, 0);
-       
-    if(socketfd == -1)
-    {
-        cout << "new socket failed!" << endl;
+    if(socketfd == -1){
+        cout << "new socket failed!\n" << endl;
         return -1;
     }
-    else
-    {
-        printf("socket create successfully ");
+    else{
+        printf("socket create successfully \n");
     }
 
     struct sockaddr_in sa;
     bzero(&sa, sizeof(sa));
     sa.sin_family = AF_INET;
-    sa.sin_port = htons(EHCO_PORT);
-    sa.sin_addr.s_addr = htons(INADDR_ANY);
+    sa.sin_port = htons(port);
+    sa.sin_addr.s_addr = inet_addr(host);
     bzero(&(sa.sin_zero), 8);
 
-    if(bind(socketfd, (struct sockaddr *)&sa, sizeof(sa))!= 0)
-    {
-        printf("bind failed ");
+    if(-1 == connect(socketfd, (struct sockaddr *)&sa, sizeof(sa))){
+        printf("connect failed!\n");
         return -1;
     }
-    else
-    {
-        printf("bind successfully ");
-    }
+    return socketfd;
+}
 
-    //listen
-    if(listen(socketfd ,MAX_CLIENT_NUM) != 0)
-    {
-        printf("listen error ");
-        return -1;
-    }
-    else
-    {
-        printf("listen successfully ");
-    }
-
-    int clientfd;
-    struct sockaddr_in clientAdd;
-    char buff[101];
-    socklen_t len = sizeof(clientAdd);
-    int closing =0;
-    while( closing == 0  && (clientfd = accept(socketfd, (struct sockaddr *)&clientAdd, &len)) >0 )
-    {
-        int n;
-        while((n = recv(clientfd,buff, 100,0 )) > 0)
-        {
-            printf("number of receive bytes = %d ", n);
-            write(STDOUT_FILENO, buff, n);
-            send(clientfd, buff, n, 0);
-            buff[n] = '\0';
-	    //memcpy(buff+n,' ',1);	    
-            if(strcmp(buff, "quit") == 0)
-            {
-                break;
-            }
-            else if(strcmp(buff, "close") == 0)
-            {
-                //server closing
-                closing = 1;
-                printf("server is closing ");
-                break;
-            }
+int run(int socketfd){
+    char buff[2048];
+    bool looping = true;
+    while(looping){
+        std::cin >> buff;
+        int n = send(socketfd,buff,strlen(buff),0);
+        std::cout <<"send:"<<buff <<" len:"<<strlen(buff)<< std::endl;
+        bzero(buff,strlen(buff));
+        while( recv(socketfd,buff,2048,0) <=0 ){
+            sleep(1000);            
         }
-
-        close(clientfd);
+        std::cout <<"recv:"<< buff << std::endl;
     }
-
-    close(socketfd);
-
     return 0;
+}
+
+int main(){
+    int socketfd = connect("111.230.247.17",8080);
+    std::cout << "successfully connect to server! fd:" << socketfd << std::endl;
+    if(socketfd >= 0){
+        run(socketfd);
+    }else{
+        std::cout << "connect failed!"<<std::endl;
+    }
+    close(socketfd);
 }
