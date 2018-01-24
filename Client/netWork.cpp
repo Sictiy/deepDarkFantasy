@@ -59,13 +59,11 @@ int run(int socketfd){
 }
 
 int main(){
-    //int socketfd = connect("111.230.247.17",8080);
-    int socketfd = connect("127.0.0.1",8080);
-    std::cout << "successfully connect to server! fd:" << socketfd << std::endl;
+    int socketfd = connect("111.230.247.17",8080);
+    //int socketfd = connect("127.0.0.1",8080);
     if(socketfd >= 0){
+        std::cout << "successfully connect to server! fd:" << socketfd << std::endl;
         run(socketfd);
-    }else{
-        std::cout << "connect failed!"<<std::endl;
     }
     close(socketfd);
 }

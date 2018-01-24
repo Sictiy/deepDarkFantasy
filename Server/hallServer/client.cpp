@@ -38,14 +38,12 @@ void Client::disconnected(){
 
 void Client::process(){
 	std::cout<<"BUFF:"<<Buff << std::endl;
-	processRequest();
-	if(USESTRING)
-		responseByString();
-	else
-		std::cout<<""<<std::endl;
+	createRequest();
+	getDataFromDb();
+	processDBData();
 }
 
-void Client::processRequest(){
+void Client::createRole(){
 	std::vector<std::string> str;
 	if(USESTRING){
 		std::cout << "get request!" << std::endl;
@@ -64,7 +62,15 @@ void Client::processRequest(){
 	std::cout << "add data to vector!"<<std::endl;
 }
 
-void Client::responseByString(){
+void Client::selectRole(){
+	
+}
+
+void Client::getDataFromDb(){
+	
+}
+
+void Client::processDBData(){
 	sort(RoleDataList.begin(),RoleDataList.end(),compare);
 	std::cout << "sort success!" << std::endl;
 	std::string data=std::string("request:");
