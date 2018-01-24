@@ -1,4 +1,5 @@
 #include "server.h"
+#include "client.h"
 
 /*******************************************/
 bool loop = true;
@@ -137,7 +138,8 @@ int Server::epollLoop(){
 				}
 				else{
 					std::cout <<"bufflen:"<< bufflen <<std::endl;
-					client->process();
+					std::thread * subthread = new std::thread(&Client::process, client);
+					subthread->detach();
 				}
 			}
 		}
@@ -165,10 +167,7 @@ int Server::setNoblock(int fd){
 void Server::run(){
 	std::cout << "server is runing!" <<std::endl;
 	Thread = new std::thread(&Server::epollLoop, this);
-	Thread->detach();
-	while(loop){
-		sleep(100);
-	}
+	//Thread->detach();
 }
 
 void Server::setLog(){

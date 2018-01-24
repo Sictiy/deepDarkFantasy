@@ -1,7 +1,8 @@
 #include "server.h"
-#include <fstream>
+#include "dbmgr.h"
 
 using namespace std;
+std::deque<Cmd> Dbmgr::cmds;
 int main(int argc, char* argv[]){
 
 	/*ofstream of("log.txt");
@@ -13,6 +14,14 @@ int main(int argc, char* argv[]){
 	Server server;
 	if(server.init()){
 		server.run();
+		Dbmgr dbmgr;
+		if(dbmgr.init()){
+			dbmgr.run();
+			delete &dbmgr;
+		}
+		/*while(true){
+			sleep(1000);
+		}*/
 		delete &server;
 	}
 

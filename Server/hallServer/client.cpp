@@ -1,4 +1,5 @@
 #include "client.h"
+#include "dbmgr.h"
 
 void splitstr(const std::string& s, const std::string seperator, std::vector<std::string>& vec){
 	std::string::size_type pos1, pos2;
@@ -38,36 +39,57 @@ void Client::disconnected(){
 
 void Client::process(){
 	std::cout<<"BUFF:"<<Buff << std::endl;
-	createRequest();
-	getDataFromDb();
-	processDBData();
+	createRole();
+	getDataFromDB();
 }
 
 void Client::createRole(){
-	std::vector<std::string> str;
+	RoleData newrole;
 	if(USESTRING){
-		std::cout << "get request!" << std::endl;
+		std::cout << "get request by string!" << std::endl;
+		std::vector<std::string> str;
 		splitstr(Buff,",",str);
-		RoleData newrole;
 		strcpy(newrole.name,str[0].c_str());
 		if(str.size()==1)
 			newrole.score = 0;
 		else
 			newrole.score = atoi(str[1].c_str());
 		std::cout << "role data:!" <<newrole.name<<","<<newrole.score<< std::endl;
-		RoleDataList.push_back(newrole);
+		//RoleDataList.push_back(newrole);
 	}else{
 		std::cout << "use other data!"<< std::endl;
 	}
-	std::cout << "add data to vector!"<<std::endl;
+	//std::cout << "add data to vector!"<<std::endl;
+	insertRole(newrole);
+}
+
+void Client::insertRole(const RoleData& role){
+	Listlen = RoleDataList.size();
+
+	Cmd cmd;
+	cmd.client = this;
+	cmd.cmd_id = Insert;
+	cmd.data = role;
+	Dbmgr::pushRequest(cmd);
 }
 
 void Client::selectRole(){
-	
+
 }
 
-void Client::getDataFromDb(){
-	
+void Client::pushRespond(const std::vector<RoleData>& vec){
+	RoleDataList.assign(vec.begin(),vec.end());
+}
+
+void Client::getDataFromDB(){
+	using namespace std::chrono;
+	while(true){
+		if(RoleDataList.size() > Listlen){
+			processDBData();
+			break;
+		}
+		std::this_thread::sleep_for(milliseconds(100));
+	}
 }
 
 void Client::processDBData(){

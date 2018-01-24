@@ -1,22 +1,7 @@
 #ifndef __DBMGR__
 #define __DBMGR__
 
-#include <string.h>
-
 #include "client.h"
-
-class Client;
-typedef enum Cmd_id{
-	Insert,
-	Select
-}Cmd_id;
-typedef struct Cmd
-{
-	Client *client;
-	Cmd_id cmd_id;
-	std::string cmd;
-	const std::function<void(std::vector<RoleData>&)> func;
-}Cmd;
 
 class Dbmgr
 {
@@ -25,13 +10,20 @@ public:
 	virtual ~Dbmgr();
 
 	bool init();
-	void pushRequest(Cmd cmd);
+	static void pushRequest(Cmd cmd);
 	bool run();
 
 private:
-	void processRequest();
+	void processRequest(Cmd cmd);
 	void process();
+	void respond(Cmd cmd);
 
+private:
+	std::thread* Thread;
+	static std::deque<Cmd> cmds;
+
+	//test 
+	std::vector<RoleData> RoleDataList;
 	/* data */
 };
 
