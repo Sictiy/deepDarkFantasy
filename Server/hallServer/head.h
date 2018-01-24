@@ -1,12 +1,11 @@
+#ifndef __HEAD__
+#define __HEAD__
 #include <sys/socket.h>
 #include <sys/epoll.h>
 //#include <glog/logging.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <netinet/in.h>
-#ifndef __HEAD__
-#define __HEAD__
-
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <string.h>
@@ -25,7 +24,7 @@
 #define MAXEVENTSIZE  1024
 #define TIMEWAIT  1000
 #define BUFFLEN  2048
-#define SERVERPORT 8080
+#define SERVERPORT 5050
 #define USESTRING true
 
 class Client;
