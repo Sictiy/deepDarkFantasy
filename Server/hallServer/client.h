@@ -20,7 +20,7 @@
 
 #define USESTRING true
 
-typedef struct roleData{
+typedef struct RoleData{
 	char name[20];
 	uint score;
 }RoleData;
@@ -37,8 +37,10 @@ public:
 
 private:
 	void sendData(std::string data);
-	void processRequest();
-	void responseByString();
+	void selectRole();
+	void createRole();
+	void getDataFromDB();
+	void processDBData();
 
 private:
 	char Buff[2048];
