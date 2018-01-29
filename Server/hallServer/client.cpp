@@ -59,10 +59,10 @@ void Client::createRole(){
 		//RoleDataList.push_back(newrole);
 	}else{
 		std::cout << "get request by protobuf!"<< std::endl;
-		deepdf::UserInfo role;
-		role.ParseFromArray(Buff,role.ByteSize());
-		newrole.score = role.score();
-		newrole.name = role.name();
+		deepdf::UserInfo *role;
+		role->ParseFromArray(Buff,role->ByteSize());
+		newrole.score = role->score();
+		newrole.name = role->name();
 	}
 	//std::cout << "add data to vector!"<<std::endl;
 	insertRole(newrole);
@@ -117,7 +117,7 @@ void Client::processDBData(){
 		std::cout << "get data success!listlen: " <<len<< std::endl;
 		sendData(data);
 	}else{
-		deepdf::DataResp respond;
+		deepdf::DataResp *respond;
 		int len;
 		if(RoleDataList.size()<=10)
 			len = RoleDataList.size();
@@ -125,14 +125,14 @@ void Client::processDBData(){
 			len = 10;
 		for(int i=0;i<=len;i++){
 			RoleData roledata = RoleDataList.at(i);
-			deepdf::UserInfo *role = respond.add_users();
+			deepdf::UserInfo *role = respond->add_users();
 			role->set_name(roledata.name);
 			role->set_score(roledata.score); 
 		}
 		
-		int length = respond.ByteSize();
+		int length = respond->ByteSize();
 		char* data = new char[length];
-		respond.SerializeToArray(data,length);
+		respond->SerializeToArray(data,length);
 		sendData(data);
 	}
 }
