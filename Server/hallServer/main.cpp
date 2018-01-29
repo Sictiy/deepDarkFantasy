@@ -5,6 +5,8 @@ using namespace std;
 std::deque<Cmd> Dbmgr::cmds;
 int main(int argc, char* argv[]){
 
+	GOOGLE_PROTOBUF_VERIFY_VERSION;
+	
 	ofstream of("log.txt");
 	streambuf* fileBuf = of.rdbuf();
 	cout.rdbuf(fileBuf);
@@ -28,5 +30,7 @@ int main(int argc, char* argv[]){
 	//google::ShutdownGoogleLogging();
 	of.flush();
 	of.close();
+
+	google::protobuf::ShutdownProtobufLibrary();
 	return 0;
 }

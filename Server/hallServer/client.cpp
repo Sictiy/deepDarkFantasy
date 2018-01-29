@@ -49,7 +49,8 @@ void Client::createRole(){
 		std::cout << "get request by string!" << std::endl;
 		std::vector<std::string> str;
 		splitstr(Buff,",",str);
-		strcpy(newrole.name,str[0].c_str());
+		newrole.name = str[0];
+		//strcpy(newrole.name,str[0].c_str());
 		if(str.size()==1)
 			newrole.score = 0;
 		else
@@ -57,7 +58,11 @@ void Client::createRole(){
 		std::cout << "role data:!" <<newrole.name<<","<<newrole.score<< std::endl;
 		//RoleDataList.push_back(newrole);
 	}else{
-		std::cout << "use other data!"<< std::endl;
+		std::cout << "get request by protobuf!"<< std::endl;
+		deepdf::UserInfo role;
+		role.ParseFromArray(Buff,role.ByteSize());
+		newrole.score = role.score();
+		newrole.name = role.name();
 	}
 	//std::cout << "add data to vector!"<<std::endl;
 	insertRole(newrole);
@@ -94,22 +99,42 @@ void Client::getDataFromDB(){
 
 void Client::processDBData(){
 	sort(RoleDataList.begin(),RoleDataList.end(),compare);
-	std::cout << "sort success!" << std::endl;
-	std::string data=std::string("request:");
-	int len;
-	if (RoleDataList.size()<=10)
-		len = RoleDataList.size();
-	else
-		len = 10;
-	for(int i=0;i<len;i++){
-		RoleData roledata = RoleDataList.at(i);
-		data.append("\n").append(roledata.name);
-		char score[100];
-		sprintf(score,"%d",roledata.score);
-		data.append(",").append(score);
+	if(USESTRING){
+		std::cout << "sort success!" << std::endl;
+		std::string data=std::string("request:");
+		int len;
+		if (RoleDataList.size()<=10)
+			len = RoleDataList.size();
+		else
+			len = 10;
+		for(int i=0;i<len;i++){
+			RoleData roledata = RoleDataList.at(i);
+			data.append("\n").append(roledata.name);
+			char score[100];
+			sprintf(score,"%d",roledata.score);
+			data.append(",").append(score);
+		}
+		std::cout << "get data success!listlen: " <<len<< std::endl;
+		sendData(data);
+	}else{
+		deepdf::DataResp respond;
+		int len;
+		if(RoleDataList.size()<=10)
+			len = RoleDataList.size();
+		else
+			len = 10;
+		for(int i=0;i<=len;i++){
+			RoleData roledata = RoleDataList.at(i);
+			deepdf::UserInfo *role = respond.add_users();
+			role->set_name(roledata.name);
+			role->set_score(roledata.score); 
+		}
+		
+		int length = respond.ByteSize();
+		char* data = new char[length];
+		respond.SerializeToArray(data,length);
+		sendData(data);
 	}
-	std::cout << "get data success!listlen: " <<len<< std::endl;
-	sendData(data);
 }
 
 void Client::sendData(std::string data){

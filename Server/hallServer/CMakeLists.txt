@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 PROJECT(HallServer)
 FILE(GLOB HEAD *.h)
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11 -pthread ")
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11 -pthread -lprotobuf")
 AUX_SOURCE_DIRECTORY(. CODE)
 ADD_EXECUTABLE(HallServer ${CODE} ${HEAD})
 LINK_DIRECTORIES("/usr/local/bin")

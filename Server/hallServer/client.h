@@ -2,6 +2,7 @@
 #define __CLIENT__
 
 #include "head.h"
+#include "Protos.pb.h"
 
 class Client 
 {

@@ -25,7 +25,7 @@
 #define TIMEWAIT  1000
 #define BUFFLEN  2048
 #define SERVERPORT 5050
-#define USESTRING true
+#define USESTRING false
 
 class Client;
 
@@ -35,7 +35,7 @@ enum Cmd_id{
 };
 
 struct RoleData{
-	char name[20];
+	std::string name;
 	uint score;
 };
 
