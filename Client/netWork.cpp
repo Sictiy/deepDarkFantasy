@@ -63,28 +63,41 @@ int runInProto(int socketfd){
     bool looping = true;
     while(looping){
         deepdf::UserInfo *role = new deepdf::UserInfo();
-        //std::string name;
-        //std::cin >> name;
-        role->set_name("xlm");
-        //int score;
-        //std::cin >> score;
-        role->set_score(100);
+        std::string name;
+        std::cin >> name;
+        int score;
+        std::cin >> score;
+        role->set_score(score);
+        role->set_name(name);
+        std::cout << "len of userinfo:" << role->ByteSize() << std::endl;
         char *buff = new char[role->ByteSize()];
-        int n = send(socketfd,buff,strlen(buff),0);
+        role->SerializeToArray(buff,role->ByteSize());
+        int n = send(socketfd,buff,role->ByteSize(),0);
         std::cout <<"send:"<<buff <<" len:"<<strlen(buff)<< std::endl;
+
+        deepdf::UserInfo *role2 = new deepdf::UserInfo();
+        role2->ParseFromArray(buff,role->ByteSize());
+        std::cout << role2->name() << "--"<<role2->score()<< std::endl;
+
         bzero(buff,strlen(buff));
         while( recv(socketfd,buff,2048,0) <=0 ){
             sleep(1000);            
         }
         std::cout <<"recv:"<< buff << std::endl;
+        deepdf::DataResp * resp = new deepdf::DataResp();
+        resp->ParseFromArray(buff,strlen(buff));
+        for(int i=0;i<(resp->users_size());i++){
+            deepdf::UserInfo  role = resp->users(i);
+            std::cout << role.name()<<"--" <<role.score()<< std::endl;
+        }
     }
     return 0;
 }
 int main(){
 
     GOOGLE_PROTOBUF_VERIFY_VERSION;
-    int socketfd = connect("111.230.247.17",5050);
-    //int socketfd = connect("127.0.0.1",5050);
+    //int socketfd = connect("111.230.247.17",5050);
+    int socketfd = connect("127.0.0.1",5050);
     if(socketfd >= 0){
         std::cout << "successfully connect to server! fd:" << socketfd << std::endl;
         runInProto(socketfd);

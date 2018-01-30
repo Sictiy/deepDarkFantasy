@@ -60,7 +60,8 @@ void Client::createRole(){
 	}else{
 		std::cout << "get request by protobuf!"<< std::endl;
 		deepdf::UserInfo *role = new deepdf::UserInfo() ;
-		role->ParseFromArray(Buff,role->ByteSize());
+		role->ParseFromArray(Buff,strlen(Buff));
+		std::cout << role->name()<<"--"<<role->score()<<std::endl;
 		newrole.score = role->score();
 		newrole.name = role->name();
 	}
@@ -117,22 +118,26 @@ void Client::processDBData(){
 		std::cout << "get data success!listlen: " <<len<< std::endl;
 		sendData(data);
 	}else{
+		std::cout << "sort success ! in protobuf" << std::endl;
 		deepdf::DataResp *respond = new deepdf::DataResp();
 		int len;
 		if(RoleDataList.size()<=10)
 			len = RoleDataList.size();
 		else
 			len = 10;
-		for(int i=0;i<=len;i++){
+		std::cout << "len fo list:" << len << std::endl;
+		for(int i=0;i<len;i++){
+			std::cout << "index fo list:" << i<< std::endl;
 			RoleData roledata = RoleDataList.at(i);
 			deepdf::UserInfo *role = respond->add_users();
 			role->set_name(roledata.name);
 			role->set_score(roledata.score); 
 		}
-		
+		std::cout << "to userinfo success:"  << std::endl;
 		int length = respond->ByteSize();
 		char* data = new char[length];
 		respond->SerializeToArray(data,length);
+		std::cout << "serialize success!" << std::endl;
 		sendData(data);
 	}
 }
