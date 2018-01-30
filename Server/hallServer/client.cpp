@@ -59,7 +59,7 @@ void Client::createRole(){
 		//RoleDataList.push_back(newrole);
 	}else{
 		std::cout << "get request by protobuf!"<< std::endl;
-		deepdf::UserInfo *role;
+		deepdf::UserInfo *role = new deepdf::UserInfo() ;
 		role->ParseFromArray(Buff,role->ByteSize());
 		newrole.score = role->score();
 		newrole.name = role->name();
@@ -117,7 +117,7 @@ void Client::processDBData(){
 		std::cout << "get data success!listlen: " <<len<< std::endl;
 		sendData(data);
 	}else{
-		deepdf::DataResp *respond;
+		deepdf::DataResp *respond = new deepdf::DataResp();
 		int len;
 		if(RoleDataList.size()<=10)
 			len = RoleDataList.size();

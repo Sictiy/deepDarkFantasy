@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <stdlib.h>
+#include "Protos.pb.h"
 
 using namespace std;
 int connect(const char * host,int port){
@@ -36,7 +37,7 @@ int connect(const char * host,int port){
     return socketfd;
 }
 
-int run(int socketfd){
+int runInString(int socketfd){
     char buff[2048];
     bool looping = true;
     while(looping){
@@ -58,12 +59,37 @@ int run(int socketfd){
     return 0;
 }
 
+int runInProto(int socketfd){
+    bool looping = true;
+    while(looping){
+        deepdf::UserInfo *role = new deepdf::UserInfo();
+        //std::string name;
+        //std::cin >> name;
+        role->set_name("xlm");
+        //int score;
+        //std::cin >> score;
+        role->set_score(100);
+        char *buff = new char[role->ByteSize()];
+        int n = send(socketfd,buff,strlen(buff),0);
+        std::cout <<"send:"<<buff <<" len:"<<strlen(buff)<< std::endl;
+        bzero(buff,strlen(buff));
+        while( recv(socketfd,buff,2048,0) <=0 ){
+            sleep(1000);            
+        }
+        std::cout <<"recv:"<< buff << std::endl;
+    }
+    return 0;
+}
 int main(){
-    //int socketfd = connect("111.230.247.17",5050);
-    int socketfd = connect("127.0.0.1",5050);
+
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    int socketfd = connect("111.230.247.17",5050);
+    //int socketfd = connect("127.0.0.1",5050);
     if(socketfd >= 0){
         std::cout << "successfully connect to server! fd:" << socketfd << std::endl;
-        run(socketfd);
+        runInProto(socketfd);
     }
     close(socketfd);
+
+    google::protobuf::ShutdownProtobufLibrary();
 }
