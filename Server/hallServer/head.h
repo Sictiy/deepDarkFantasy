@@ -20,12 +20,18 @@
 #include <deque>
 #include <algorithm>
 #include <fstream>
+#include <mysql.h>
 
 #define MAXEVENTSIZE  1024
 #define TIMEWAIT  1000
 #define BUFFLEN  2048
 #define SERVERPORT 5050
 #define USESTRING false
+
+#define m_ip "127.0.0.1"
+#define m_mysql_usr "root"
+#define m_mysql_pw "qwer1234!"
+#define m_database "deepdf"
 
 class Client;
 
@@ -43,6 +49,11 @@ struct Cmd{
 	Client * client;
 	Cmd_id cmd_id;
 	RoleData data;
+};
+
+struct ClientRequest{
+	int fd;
+	char buff[BUFFLEN];
 };
 
 /*typedef struct Respond{

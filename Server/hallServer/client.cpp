@@ -23,27 +23,33 @@ bool compare(const RoleData &a, const RoleData & b){
 }
 
 /**************************************************************************/
-Client::Client(int fd):
-Fd(fd)
-{
-
+Client::Client(){
+	GetDbData = false;
+	RoleDataList.clear();
+	Requests.clear();
 }
 
 Client::~Client(){
-
+	if(nullptr != Thread){
+		Thread->join();
+	}
+	delete Thread;
 }
 
-void Client::disconnected(){
-	close(Fd);
-}
-
-void Client::process(){
-	std::cout<<"BUFF:"<<Buff << std::endl;
-	createRole();
+bool Client::init(){
+	selectRole();
 	getDataFromDB();
+	return true;
 }
 
-void Client::createRole(){
+void Client::processOneRequest(const ClientRequest& request){
+	std::cout<<"BUFF:"<<request.buff<< std::endl;
+	createRole(request);
+	formatData(request.fd);
+}
+
+void Client::createRole(const ClientRequest& request){
+	const char *Buff = request.buff;
 	RoleData newrole;
 	if(USESTRING){
 		std::cout << "get request by string!" << std::endl;
@@ -66,40 +72,30 @@ void Client::createRole(){
 		newrole.name = role->name();
 	}
 	//std::cout << "add data to vector!"<<std::endl;
-	insertRole(newrole);
+	if(RoleDataList.size() < 10 || MinScore <= newrole.score)
+		insertRole(newrole);
 }
 
 void Client::insertRole(const RoleData& role){
-	Listlen = RoleDataList.size();
-
+	std::cout << "client:insert role!" << std::endl;
 	Cmd cmd;
 	cmd.client = this;
 	cmd.cmd_id = Insert;
 	cmd.data = role;
 	Dbmgr::pushRequest(cmd);
-}
-
-void Client::selectRole(){
-
-}
-
-void Client::pushRespond(const std::vector<RoleData>& vec){
-	RoleDataList.assign(vec.begin(),vec.end());
-}
-
-void Client::getDataFromDB(){
-	using namespace std::chrono;
-	while(true){
-		if(RoleDataList.size() > Listlen){
-			processDBData();
-			break;
-		}
-		std::this_thread::sleep_for(milliseconds(100));
-	}
-}
-
-void Client::processDBData(){
+	//insert into local list;
+	std::cout << "len fo list:" << RoleDataList.size() << std::endl;
+	RoleDataList.push_back(role);
+	std::cout << "len fo list:" << RoleDataList.size() << std::endl;
 	sort(RoleDataList.begin(),RoleDataList.end(),compare);
+	if(RoleDataList.size()>=10){
+		MinScore = RoleDataList.at(9).score;
+	}else{
+		MinScore = RoleDataList.back().score;
+	}
+	std::cout << "minscore!" <<MinScore<< std::endl;
+}
+void Client::formatData(int fd){
 	if(USESTRING){
 		std::cout << "sort success!" << std::endl;
 		std::string data=std::string("request:");
@@ -116,7 +112,7 @@ void Client::processDBData(){
 			data.append(",").append(score);
 		}
 		std::cout << "get data success!listlen: " <<len<< std::endl;
-		sendData(data);
+		sendData(fd,data);
 	}else{
 		std::cout << "sort success ! in protobuf" << std::endl;
 		deepdf::DataResp *respond = new deepdf::DataResp();
@@ -132,21 +128,75 @@ void Client::processDBData(){
 			deepdf::UserInfo *role = respond->add_users();
 			role->set_name(roledata.name);
 			role->set_score(roledata.score); 
+			std::cout << "name :" << role->name()<< std::endl;
+			std::cout << "score :" << role->score()<< std::endl;
 		}
 		std::cout << "to userinfo success:"  << std::endl;
 		int length = respond->ByteSize();
 		char* data = new char[length];
 		respond->SerializeToArray(data,length);
 		std::cout << "serialize success!" << std::endl;
-		sendData(data);
+		sendData(fd,data);
 	}
 }
 
-void Client::sendData(std::string data){
-	write(Fd, data.c_str(), data.length());
+void Client::sendData(int fd, std::string data){
+	write(fd, data.c_str(), data.length());
 	std::cout << "send data success !data:\n" <<data<< std::endl;
 }
+/***************************************/
+void Client::selectRole(){
+	std::cout << "client:selectRole" <<std::endl;
+	Cmd cmd;
+	cmd.client = this;
+	cmd.cmd_id = Select;
+	Dbmgr::pushRequest(cmd);
+}
 
+void Client::pushRespond(const std::vector<RoleData>& vec){  //
+	std::cout << "len fo vec:" << vec.size() << std::endl;
+	RoleDataList.assign(vec.begin(),vec.end());
+	GetDbData = true;
+	std::cout << "client:get respond from db" <<std::endl;
+}
+
+void Client::getDataFromDB(){
+	std::cout << "client:get data from db 1" <<std::endl;
+	using namespace std::chrono;
+	while(!GetDbData){
+		std::this_thread::sleep_for(milliseconds(100));
+	}
+	std::cout << "client:get data from db 2" <<std::endl;
+}
+/***************************************/
+/*
 char* Client::getBuff(){
 	return Buff;
+}
+/**************************************/
+void Client::process(){
+	std::cout << "client: start process request loop!" <<std::endl;
+	using namespace std::chrono;
+	while(true){
+		if(Requests.empty()){
+			continue;
+		}else{
+			std::cout << "client: start process request!" <<std::endl;
+			processOneRequest(Requests.back());
+			Requests.pop_back();
+			continue;
+		}
+		std::this_thread::sleep_for(milliseconds(100));
+	}
+}
+
+void Client::run(){
+	std::cout << "clientmgr is runing!" <<std::endl;
+	Thread = new std::thread(&Client::process,this);
+	std::cout << "process loop is runing!" <<std::endl;
+}
+
+void Client::pushRequest(ClientRequest request){
+	Requests.push_front(request);
+	std::cout << "client: get request!" <<std::endl;
 }

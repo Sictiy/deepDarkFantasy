@@ -7,27 +7,30 @@
 class Client 
 {
 public:
-	Client(int fd);
+	Client();
 	virtual ~Client();
 
-	void disconnected();
-	char* getBuff();
-	void process();
 	void pushRespond(const std::vector<RoleData>& vec);
+	void pushRequest(ClientRequest request);
+	void run();
+	bool init();
 
 private:
-	void sendData(std::string data);
+	void sendData(int fd, std::string data);
 	void selectRole();
-	void createRole();
+	void createRole(const ClientRequest& request);
 	void insertRole(const RoleData& role);
+	void formatData(int fd);
 	void getDataFromDB();
-	void processDBData();
+	void process();
+	void processOneRequest(const ClientRequest& request);
 
 private:
-	char Buff[2048];
-	int Fd;
-	int Listlen;
+	int MinScore;
+	bool GetDbData;
+	std::thread* Thread;
 	std::vector<RoleData> RoleDataList;
+	std::deque<ClientRequest> Requests;
 };
 
 #endif

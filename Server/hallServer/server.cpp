@@ -12,10 +12,11 @@ void sig_handler( int sig )
 }
 /*******************************************/
 
-Server::Server():
+Server::Server(Client *client):
 	Epoolfd(0),
 	Listenfd(0),
 	Thread(nullptr),
+	ClientMgr(client),
 	Frame(0),
 	Isloop(true){
 	ClientMap.clear();
@@ -29,19 +30,15 @@ Server::~Server(){
 	delete Thread;
 	close(Listenfd);
 
-	for(auto iterator:ClientMap){
-		close(iterator.first);
-		delete iterator.second;
-	}
-
 	ClientMap.clear();
+	delete ClientMgr;
 	std::cout << "close server!"<<std::endl;
 }
 
 bool Server::init(){
 	if(createServer("0.0.0.0",SERVERPORT)){
 		setLog();
-		setDaemon();
+		//setDaemon();
 		return true;
 	}
 	return false;
@@ -92,15 +89,18 @@ void Server::ctlEvent(int fd, bool flag){
 	epoll_ctl(Epoolfd, flag ? EPOLL_CTL_ADD : EPOLL_CTL_DEL, fd, &ev);
 	if(flag){
 		setNoblock(fd);
-		ClientMap[fd] = new Client(fd);
+		ClientMap[fd] = fd;
+		if(nullptr == ClientMgr){
+			ClientMgr = new Client();
+			ClientMgr->run();
+		}
 		if(fd != Listenfd)
 			std::cout << fd << " add to loop." << std::endl;
 	}
 	else{
 		close(fd);
-		delete ClientMap[fd];
 		ClientMap.erase(fd);
-		std::cout << fd << "exit from loop." << std::endl;
+		std::cout << fd << " exit from loop." << std::endl;
 	}
 }
 
@@ -127,19 +127,15 @@ int Server::epollLoop(){
 				if((fd == events[i].data.fd) < 0) 
 					continue;
 
-				Client* client = ClientMap[fd];
-				if(NULL == client) 
-					continue;
-
-				memset(client->getBuff(), 0, (size_t)1024);
-				if((bufflen = read(fd, client->getBuff(), BUFFLEN)) <= 1 ) {
+				ClientRequest request;
+				request.fd = fd;
+				memset(request.buff, 0, (size_t)2048);
+				if((bufflen = read(fd, request.buff, BUFFLEN)) <= 0 ) {
 					ctlEvent(fd, false);
-					client->disconnected();
 				}
 				else{
 					std::cout <<"bufflen:"<< bufflen <<std::endl;
-					std::thread * subthread = new std::thread(&Client::process, client);
-					subthread->detach();
+					ClientMgr->pushRequest(request);
 				}
 			}
 		}

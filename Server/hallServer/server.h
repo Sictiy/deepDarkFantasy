@@ -6,7 +6,7 @@
 class Server
 {
 public:
-	Server();
+	Server(Client * client);
 	virtual ~Server();
 
 	bool init();
@@ -26,8 +26,8 @@ private:
 	bool Isloop;
 	std::thread* Thread;
 	int64_t Frame;
-
-	std::map<int,Client*> ClientMap;
+	Client * ClientMgr;
+	std::map<int,int> ClientMap;
 };
 
 #endif
