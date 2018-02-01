@@ -136,6 +136,16 @@ void Client::formatData(int fd){
 		char* data = new char[length];
 		respond->SerializeToArray(data,length);
 		std::cout << "serialize success!" << std::endl;
+/*
+		deepdf::UserInfo *role = new deepdf::UserInfo() ;
+		role->set_name("bbb");
+		role->set_score(666);
+		int length = role->ByteSize();
+		char* data = new char[length];
+		bzero(data,strlen(data));
+		role->SerializeToArray(data,length);
+		std::cout << role->name()<<"--"<<role->score()<<std::endl;
+		std::cout << "len fo sendbuff:" << strlen(data) << std::endl;*/
 		sendData(fd,data);
 	}
 }

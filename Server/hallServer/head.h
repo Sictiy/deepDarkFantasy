@@ -28,10 +28,10 @@
 #define SERVERPORT 5050
 #define USESTRING false
 
-#define m_ip "127.0.0.1"
+#define m_ip "localhost"
 #define m_mysql_usr "root"
-#define m_mysql_pw "qwer1234!"
-#define m_database "deepdf"
+#define m_mysql_pw "1"
+#define m_database "mall"
 
 class Client;
 

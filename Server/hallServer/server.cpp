@@ -38,7 +38,7 @@ Server::~Server(){
 bool Server::init(){
 	if(createServer("0.0.0.0",SERVERPORT)){
 		setLog();
-		//setDaemon();
+		setDaemon();
 		return true;
 	}
 	return false;
