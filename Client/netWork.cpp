@@ -83,26 +83,29 @@ int runInProto(int socketfd){
         while( recv(socketfd,buff,2048,0) <=0 ){
             sleep(1000);            
         }
-        std::cout <<"recv:"<< buff << std::endl;
+        std::cout <<"recv:len:"<< strlen(buff)<<"-++-"<<buff << std::endl;
         deepdf::DataResp * resp = new deepdf::DataResp();
         resp->ParseFromArray(buff,strlen(buff));
         for(int i=0;i<(resp->users_size());i++){
             deepdf::UserInfo  role = resp->users(i);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
             std::cout << role.name()<<"--" <<role.score()<< std::endl;
         }
+        deepdf::UserInfo *role3 = new deepdf::UserInfo();
+        role3->ParseFromArray(buff,role->ByteSize());
+        std::cout << role3->name() << "--"<<role3->score()<< std::endl;
+
     }
     return 0;
 }
 int main(){
 
     GOOGLE_PROTOBUF_VERIFY_VERSION;
-    int socketfd = connect("111.230.247.17",5050);
-    //int socketfd = connect("127.0.0.1",5050);
+    //int socketfd = connect("111.230.247.17",5050);
+    int socketfd = connect("127.0.0.1",5050);
     if(socketfd >= 0){
         std::cout << "successfully connect to server! fd:" << socketfd << std::endl;
         runInProto(socketfd);
     }
     close(socketfd);
-
     google::protobuf::ShutdownProtobufLibrary();
 }
