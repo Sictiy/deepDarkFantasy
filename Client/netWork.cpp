@@ -72,8 +72,12 @@ int runInProto(int socketfd){
         std::cout << "len of userinfo:" << role->ByteSize() << std::endl;
         char *buff = new char[role->ByteSize()];
         role->SerializeToArray(buff,role->ByteSize());
-        int n = send(socketfd,buff,role->ByteSize(),0);
-        std::cout <<"send:"<<buff <<" len:"<<strlen(buff)<< std::endl;
+        char *newbuff = new char[5000];
+        for(int i=0;i<700;i++)
+            strcat(newbuff,buff);
+        int n = send(socketfd,newbuff,5000,0);
+        //int n = send(socketfd,buff,role->ByteSize(),0);
+        std::cout <<"send:"<<"+++++"<<" len:"<<strlen(buff)<< std::endl;
 
         deepdf::UserInfo *role2 = new deepdf::UserInfo();
         role2->ParseFromArray(buff,role->ByteSize());
@@ -83,16 +87,20 @@ int runInProto(int socketfd){
         while( recv(socketfd,buff,2048,0) <=0 ){
             sleep(1000);            
         }
-        std::cout <<"recv:len:"<< strlen(buff)<<"-++-"<<buff << std::endl;
+        std::cout <<"recv:len:"<< strlen(buff)<<"-++-"<< std::endl;
         deepdf::DataResp * resp = new deepdf::DataResp();
         resp->ParseFromArray(buff,strlen(buff));
         for(int i=0;i<(resp->users_size());i++){
             deepdf::UserInfo  role = resp->users(i);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
             std::cout << role.name()<<"--" <<role.score()<< std::endl;
         }
+        /*while( recv(socketfd,buff,2048,0) <=0 ){
+            sleep(1000);            
+        }
+        std::cout <<"++++++++++++++++++++++++"<< std::endl;
         deepdf::UserInfo *role3 = new deepdf::UserInfo();
         role3->ParseFromArray(buff,role->ByteSize());
-        std::cout << role3->name() << "--"<<role3->score()<< std::endl;
+        std::cout << role3->name() << "--"<<role3->score()<< std::endl;*/
 
     }
     return 0;

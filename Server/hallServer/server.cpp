@@ -122,6 +122,12 @@ int Server::epollLoop(){
 				ctlEvent(fd, true);
 				char ipAddress[INET_ADDRSTRLEN];
 				std::cout << "accept connection from :"<<inet_ntop(AF_INET, &client_addr.sin_addr, ipAddress, sizeof(ipAddress))<<":"<<ntohs(client_addr.sin_port)<< std::endl;
+				/*********************************/
+				ClientRequest request;
+				request.fd = fd;
+				request.cmd_id = Select;
+				memset(request.buff, 0, (size_t)2048);
+				ClientMgr->pushRequest(request);
 			}
 			else if(events[i].events & EPOLLIN){
 				if((fd == events[i].data.fd) < 0) 
@@ -129,6 +135,7 @@ int Server::epollLoop(){
 
 				ClientRequest request;
 				request.fd = fd;
+				request.cmd_id = Insert;
 				memset(request.buff, 0, (size_t)2048);
 				if((bufflen = read(fd, request.buff, BUFFLEN)) <= 0 ) {
 					ctlEvent(fd, false);

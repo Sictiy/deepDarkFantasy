@@ -53,6 +53,7 @@ struct Cmd{
 
 struct ClientRequest{
 	int fd;
+	Cmd_id cmd_id;
 	char buff[BUFFLEN];
 };
 

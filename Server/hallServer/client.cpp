@@ -38,14 +38,17 @@ Client::~Client(){
 
 bool Client::init(){
 	selectRole();
-	getDataFromDB();
+	//getDataFromDB();
 	return true;
 }
 
 void Client::processOneRequest(const ClientRequest& request){
 	std::cout<<"BUFF:"<<request.buff<< std::endl;
-	createRole(request);
-	formatData(request.fd);
+	if(request.cmd_id == Insert){
+		createRole(request);
+	}else{
+		formatData(request.fd);
+	}
 }
 
 void Client::createRole(const ClientRequest& request){
@@ -65,14 +68,34 @@ void Client::createRole(const ClientRequest& request){
 		//RoleDataList.push_back(newrole);
 	}else{
 		std::cout << "get request by protobuf!"<< std::endl;
+
+		std::cout <<"recv:len:"<< strlen(Buff)<<"-++-"<<Buff << std::endl;
+       /* deepdf::DataResp * resp = new deepdf::DataResp();
+        resp->ParseFromArray(Buff,strlen(Buff));
+        for(int i=0;i<(resp->users_size());i++){
+            deepdf::UserInfo  role = resp->users(i);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+            std::cout << role.name()<<"--" <<role.score()<< std::endl;
+        }
+		delete resp;
+		std::cout << "+++++++++++++++++++++++++++++++++++"<< std::endl;*/
+
 		deepdf::UserInfo *role = new deepdf::UserInfo() ;
 		role->ParseFromArray(Buff,strlen(Buff));
 		std::cout << role->name()<<"--"<<role->score()<<std::endl;
 		newrole.score = role->score();
 		newrole.name = role->name();
+		delete role;
 	}
 	//std::cout << "add data to vector!"<<std::endl;
-	if(RoleDataList.size() < 10 || MinScore <= newrole.score)
+	if(RoleDataList.size()>=10){
+		MinScore = RoleDataList.at(9).score;
+	}else if(RoleDataList.size()==0){
+		MinScore = 0;
+	}else{
+		MinScore = RoleDataList.back().score;
+	}
+	std::cout << "min-score, new-score:"<<MinScore <<"--"<< newrole.score << std::endl;
+	if((RoleDataList.size() < 10 || MinScore <= newrole.score) && newrole.score>200 && newrole.score<2000 &&newrole.name.length() < 10)
 		insertRole(newrole);
 }
 
@@ -88,12 +111,6 @@ void Client::insertRole(const RoleData& role){
 	RoleDataList.push_back(role);
 	std::cout << "len fo list:" << RoleDataList.size() << std::endl;
 	sort(RoleDataList.begin(),RoleDataList.end(),compare);
-	if(RoleDataList.size()>=10){
-		MinScore = RoleDataList.at(9).score;
-	}else{
-		MinScore = RoleDataList.back().score;
-	}
-	std::cout << "minscore!" <<MinScore<< std::endl;
 }
 void Client::formatData(int fd){
 	if(USESTRING){
@@ -112,7 +129,7 @@ void Client::formatData(int fd){
 			data.append(",").append(score);
 		}
 		std::cout << "get data success!listlen: " <<len<< std::endl;
-		sendData(fd,data);
+		sendData(fd,(char* )data.c_str(),data.length());
 	}else{
 		std::cout << "sort success ! in protobuf" << std::endl;
 		deepdf::DataResp *respond = new deepdf::DataResp();
@@ -134,15 +151,32 @@ void Client::formatData(int fd){
 		std::cout << "to userinfo success:"  << std::endl;
 		int length = respond->ByteSize();
 		char* data = new char[length];
+		std::cout << "len fo data:" << strlen(data) << std::endl;
 		respond->SerializeToArray(data,length);
+		std::cout << "len fo data:" << strlen(data) << std::endl;
 		std::cout << "serialize success!" << std::endl;
-		sendData(fd,data);
+		std::cout << "serialize length!" <<length<< std::endl;
+		sendData(fd,data,length);
+
+		/*deepdf::UserInfo *role = new deepdf::UserInfo() ;
+		role->set_name("bbb");
+		role->set_score(666);
+		length = role->ByteSize();
+		std::cout<<"bytesize:"<<length << std::endl;
+		char* dataUser = new char[length];
+		bzero(dataUser,length);
+		std::cout << "len fo sendbuff:" << strlen(dataUser) << std::endl;
+		role->SerializeToArray(dataUser,length);
+		std::cout << role->name()<<"--"<<role->score()<<std::endl;
+		std::cout << "len fo sendbuff:" << strlen(dataUser) << std::endl;
+		//sendData(fd,dataUser,length);*/
 	}
 }
 
-void Client::sendData(int fd, std::string data){
-	write(fd, data.c_str(), data.length());
+void Client::sendData(int fd, char * data, int length){
+	write(fd, data, length);
 	std::cout << "send data success !data:\n" <<data<< std::endl;
+	std::cout << "send data success !length:\n" <<length<< std::endl;
 }
 /***************************************/
 void Client::selectRole(){
@@ -165,6 +199,11 @@ void Client::getDataFromDB(){
 	using namespace std::chrono;
 	while(!GetDbData){
 		std::this_thread::sleep_for(milliseconds(100));
+	}
+	if(RoleDataList.size()>=10){
+		MinScore = RoleDataList.at(9).score;
+	}else{
+		MinScore = RoleDataList.back().score;
 	}
 	std::cout << "client:get data from db 2" <<std::endl;
 }
