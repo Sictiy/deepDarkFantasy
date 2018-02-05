@@ -27,6 +27,7 @@
 #define BUFFLEN  2048
 #define SERVERPORT 5050
 #define USESTRING false
+#define MAXLEN 1024*4
 
 #define m_ip "127.0.0.1"
 #define m_mysql_usr "root"
@@ -54,7 +55,15 @@ struct Cmd{
 struct ClientRequest{
 	int fd;
 	Cmd_id cmd_id;
-	char buff[BUFFLEN];
+	char buff[MAXLEN];
+};
+
+struct Cli
+{
+	int fd;
+	short offset;
+	short length;
+	char buff[MAXLEN];
 };
 
 /*typedef struct Respond{
@@ -62,5 +71,5 @@ struct ClientRequest{
 	Cmd_id cmd_id;
 	std::vector<RoleData> vec;
 }Respond;*/
-
+ 
 #endif

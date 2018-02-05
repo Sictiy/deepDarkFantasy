@@ -72,22 +72,34 @@ int runInProto(int socketfd){
         std::cout << "len of userinfo:" << role->ByteSize() << std::endl;
         char *buff = new char[role->ByteSize()];
         role->SerializeToArray(buff,role->ByteSize());
-        char *newbuff = new char[5000];
-        for(int i=0;i<700;i++)
-            strcat(newbuff,buff);
-        int n = send(socketfd,newbuff,5000,0);
-        //int n = send(socketfd,buff,role->ByteSize(),0);
-        std::cout <<"send:"<<"+++++"<<" len:"<<strlen(buff)<< std::endl;
+
+        short length = role->ByteSize()+2;
+        //short len = ntohs(length);
+        char * datatoh = new char[length];
+        memcpy(datatoh,&length,2);
+        memcpy(datatoh+2,buff,length-2);
+
+        int n = send(socketfd,datatoh,role->ByteSize()+2,0);
+        std::cout <<"send:"<<"+++++"<<" len:"<<length<<"--"<< std::endl;
 
         deepdf::UserInfo *role2 = new deepdf::UserInfo();
         role2->ParseFromArray(buff,role->ByteSize());
         std::cout << role2->name() << "--"<<role2->score()<< std::endl;
+        char*  newbuff = new char[1024*64];
+        bzero(newbuff,strlen(newbuff));
+        recv(socketfd,newbuff,1024*64,0);
+        //    sleep(1000);
+        std::cout <<"recv:len:"<< strlen(newbuff)<<"-++-"<< std::endl;
 
-        bzero(buff,strlen(buff));
-        while( recv(socketfd,buff,2048,0) <=0 ){
-            sleep(1000);            
-        }
-        std::cout <<"recv:len:"<< strlen(buff)<<"-++-"<< std::endl;
+        short recvlen=0;
+        memcpy(&recvlen,newbuff,2);
+        //short recvlength = htons(recvlen);
+        std::cout <<"recv:len:"<< recvlen<<"-++---"<< std::endl;
+        recvlen = newbuff[0]+(newbuff[1]<<8);
+        std::cout <<"recv:len:"<< recvlen<<"----++-"<< std::endl;
+
+
+
         deepdf::DataResp * resp = new deepdf::DataResp();
         resp->ParseFromArray(buff,strlen(buff));
         for(int i=0;i<(resp->users_size());i++){

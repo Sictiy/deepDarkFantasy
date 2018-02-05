@@ -19,6 +19,7 @@ private:
 	void ctlEvent(int fd, bool flag);
 	void setLog();
 	void setDaemon();
+	void processTcpPackage(int fd);
 
 private:
 	int Epoolfd;
@@ -27,7 +28,7 @@ private:
 	std::thread* Thread;
 	int64_t Frame;
 	Client * ClientMgr;
-	std::map<int,int> ClientMap;
+	std::map<int,Cli> ClientMap;
 };
 
 #endif

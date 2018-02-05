@@ -8,7 +8,7 @@ int main(int argc, char* argv[]){
 
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
 	
-	ofstream of("log.txt");
+	/*ofstream of("log.txt");
 	streambuf* fileBuf = of.rdbuf();
 	cout.rdbuf(fileBuf);
 	//FLAGS_log_dir = "$HOME/logs"; 
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]){
 		std::this_thread::sleep_for(milliseconds(2000));
 	}*/
 
-	//google::ShutdownGoogleLogging();
+	/*//google::ShutdownGoogleLogging();
 	of.flush();
 	of.close();
 	//*/

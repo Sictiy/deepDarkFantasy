@@ -151,32 +151,29 @@ void Client::formatData(int fd){
 		std::cout << "to userinfo success:"  << std::endl;
 		int length = respond->ByteSize();
 		char* data = new char[length];
-		std::cout << "len fo data:" << strlen(data) << std::endl;
 		respond->SerializeToArray(data,length);
 		std::cout << "len fo data:" << strlen(data) << std::endl;
-		std::cout << "serialize success!" << std::endl;
-		std::cout << "serialize length!" <<length<< std::endl;
 		sendData(fd,data,length);
-
-		/*deepdf::UserInfo *role = new deepdf::UserInfo() ;
-		role->set_name("bbb");
-		role->set_score(666);
-		length = role->ByteSize();
-		std::cout<<"bytesize:"<<length << std::endl;
-		char* dataUser = new char[length];
-		bzero(dataUser,length);
-		std::cout << "len fo sendbuff:" << strlen(dataUser) << std::endl;
-		role->SerializeToArray(dataUser,length);
-		std::cout << role->name()<<"--"<<role->score()<<std::endl;
-		std::cout << "len fo sendbuff:" << strlen(dataUser) << std::endl;
-		//sendData(fd,dataUser,length);*/
 	}
 }
 
 void Client::sendData(int fd, char * data, int length){
-	write(fd, data, length);
+	//add length to data
+	length += 2;
+	std::cout << "length:" << length<< std::endl;
+	char * datatoh = new char[length];
+    bzero(datatoh,strlen(datatoh));
+	memcpy(datatoh,&length,2);
+	memcpy(datatoh+2,data,length-2);
+	int sendlen = 0;
+	while(sendlen < length){
+		std::cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" <<std::endl;
+		sendlen += write(fd, datatoh+sendlen, length-sendlen);
+	}
 	std::cout << "send data success !data:\n" <<data<< std::endl;
-	std::cout << "send data success !length:\n" <<length<< std::endl;
+
+	short ll = datatoh[0]+(datatoh[1]<<8);
+	std::cout << "serialize length:"<<"++++"<<ll<<std::endl;
 }
 /***************************************/
 void Client::selectRole(){
