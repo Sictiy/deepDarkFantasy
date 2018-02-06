@@ -95,7 +95,7 @@ void Client::createRole(const ClientRequest& request){
 		MinScore = RoleDataList.back().score;
 	}
 	std::cout << "min-score, new-score:"<<MinScore <<"--"<< newrole.score << std::endl;
-	if((RoleDataList.size() < 10 || MinScore <= newrole.score) && newrole.score>200 && newrole.score<2000 &&newrole.name.length() < 10)
+	if((RoleDataList.size() < 10 || MinScore <= newrole.score) && newrole.score>100 && newrole.score<20000 &&newrole.name.length() < 20)
 		insertRole(newrole);
 }
 
