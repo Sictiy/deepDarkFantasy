@@ -73,13 +73,15 @@ int runInProto(int socketfd){
         char *buff = new char[role->ByteSize()];
         role->SerializeToArray(buff,role->ByteSize());
 
-        short length = role->ByteSize()+2;
+        short length = role->ByteSize()+4;
         //short len = ntohs(length);
         char * datatoh = new char[length];
+        short cmd = 1;
         memcpy(datatoh,&length,2);
-        memcpy(datatoh+2,buff,length-2);
+        memcpy(datatoh+2,&cmd,2);
+        memcpy(datatoh+4,buff,length-4);
 
-        int n = send(socketfd,datatoh,role->ByteSize()+2,0);
+        int n = send(socketfd,datatoh,role->ByteSize()+4,0);
         std::cout <<"send:"<<"+++++"<<" len:"<<length<<"--"<< std::endl;
 
         deepdf::UserInfo *role2 = new deepdf::UserInfo();
@@ -89,19 +91,17 @@ int runInProto(int socketfd){
         bzero(newbuff,strlen(newbuff));
         recv(socketfd,newbuff,1024*64,0);
         //    sleep(1000);
-        std::cout <<"recv:len:"<< strlen(newbuff)<<"-++-"<< std::endl;
-
         short recvlen=0;
         memcpy(&recvlen,newbuff,2);
         //short recvlength = htons(recvlen);
         std::cout <<"recv:len:"<< recvlen<<"-++---"<< std::endl;
-        recvlen = newbuff[0]+(newbuff[1]<<8);
+        recvlen = newbuff[2]+(newbuff[3]<<8);
         std::cout <<"recv:len:"<< recvlen<<"----++-"<< std::endl;
 
 
 
         deepdf::DataResp * resp = new deepdf::DataResp();
-        resp->ParseFromArray(buff,strlen(buff));
+        resp->ParseFromArray(buff+4,strlen(buff)-4);
         for(int i=0;i<(resp->users_size());i++){
             deepdf::UserInfo  role = resp->users(i);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
             std::cout << role.name()<<"--" <<role.score()<< std::endl;

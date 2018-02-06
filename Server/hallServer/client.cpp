@@ -129,7 +129,7 @@ void Client::formatData(int fd){
 			data.append(",").append(score);
 		}
 		std::cout << "get data success!listlen: " <<len<< std::endl;
-		sendData(fd,(char* )data.c_str(),data.length());
+		sendData(fd,s2c_rank_get,(char* )data.c_str(),data.length());
 	}else{
 		std::cout << "sort success ! in protobuf" << std::endl;
 		deepdf::DataResp *respond = new deepdf::DataResp();
@@ -153,18 +153,19 @@ void Client::formatData(int fd){
 		char* data = new char[length];
 		respond->SerializeToArray(data,length);
 		std::cout << "len fo data:" << strlen(data) << std::endl;
-		sendData(fd,data,length);
+		sendData(fd,s2c_rank_get,data,length);
 	}
 }
 
-void Client::sendData(int fd, char * data, int length){
+void Client::sendData(int fd,int cmd_id, char * data, int length){
 	//add length to data
-	length += 2;
+	length += 4;
 	std::cout << "length:" << length<< std::endl;
 	char * datatoh = new char[length];
     bzero(datatoh,strlen(datatoh));
 	memcpy(datatoh,&length,2);
-	memcpy(datatoh+2,data,length-2);
+	memcpy(datatoh+2,&cmd_id,2);
+	memcpy(datatoh+4,data,length-4);
 	int sendlen = 0;
 	while(sendlen < length){
 		std::cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" <<std::endl;

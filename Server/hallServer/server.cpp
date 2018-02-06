@@ -38,7 +38,7 @@ Server::~Server(){
 bool Server::init(){
 	if(createServer("0.0.0.0",SERVERPORT)){
 		setLog();
-		//setDaemon();
+		setDaemon();
 		return true;
 	}
 	return false;
@@ -198,6 +198,7 @@ void Server::processTcpPackage(int fd){
 	if(cli.offset >= 2){
 		//memcpy(&cli->length,cli->buff,2);
 		cli.length = cli.buff[0]+(cli.buff[1]<<8);
+		std::cout << "new length: " << cli.length << std::endl;
 	}
 	std::cout << "new offset: " << cli.offset << std::endl;
 	
@@ -206,10 +207,13 @@ void Server::processTcpPackage(int fd){
 		short length = cli.length;
 		ClientRequest request;
 		request.fd = fd;
+
+		short cmd = cli.buff[2]+(cli.buff[3]<<8);
+		std::cout << "cmd:" << cmd << std::endl;
 		request.cmd_id = Insert;
 		//memset(request.buff ,0 ,(size_t)MAXLEN);
 		std::cout <<"serialize length: "<< cli.length<<std::endl;
-		memcpy(request.buff,cli.buff+2,length-2);
+		memcpy(request.buff,cli.buff+4,length-4);
 		std::cout <<"bufflen:"<< strlen(request.buff)<<std::endl;
 		ClientMgr->pushRequest(request);
 

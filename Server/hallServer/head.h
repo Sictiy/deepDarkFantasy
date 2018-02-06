@@ -34,6 +34,10 @@
 #define m_mysql_pw "qwer1234!"
 #define m_database "deepdf"
 
+#define c2s_rank_get  1
+#define s2c_rank_get  2
+
+
 class Client;
 
 enum Cmd_id{

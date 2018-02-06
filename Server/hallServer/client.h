@@ -16,7 +16,7 @@ public:
 	bool init();
 
 private:
-	void sendData(int fd, char* data,int length);
+	void sendData(int fd,int cmd_id ,char* data,int length);
 	void selectRole();
 	void createRole(const ClientRequest& request);
 	void insertRole(const RoleData& role);
