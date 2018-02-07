@@ -37,8 +37,8 @@ Server::~Server(){
 
 bool Server::init(){
 	if(createServer("0.0.0.0",SERVERPORT)){
-		setLog();
-		setDaemon();
+		//setLog();
+		//setDaemon();
 		return true;
 	}
 	return false;
@@ -93,7 +93,7 @@ void Server::ctlEvent(int fd, bool flag){
 		newcli.fd = fd;
 		newcli.offset = 0;
 		newcli.length = MAXLEN;
-		memset(&newcli,0,sizeof(Cli));
+		//memset(&newcli,0,sizeof(Cli));
 		ClientMap[fd] = newcli;
 		if(nullptr == ClientMgr){
 			std::cout << "init ClientMgr"<< std::endl;
@@ -124,6 +124,7 @@ int Server::epollLoop(){
 	while(true){
 		nfds = epoll_wait(Epoolfd, events, MAXEVENTSIZE, TIMEWAIT);
 		for(int i = 0; i < nfds; i++){
+			std::cout << "+++++" << nfds << std::endl;
 			if(events[i].data.fd == Listenfd){
 				fd = accept(Listenfd, (struct sockaddr*)&client_addr, &client_len);
 				ctlEvent(fd, true);
@@ -148,7 +149,7 @@ int Server::epollLoop(){
 
         if (dur.count() * 30 < Frame * 1000)
         {
-            std::this_thread::sleep_for(milliseconds(8));
+            std::this_thread::sleep_for(milliseconds(100));
             continue;
         }
 

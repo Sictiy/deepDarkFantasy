@@ -46,9 +46,8 @@ void Client::processOneRequest(const ClientRequest& request){
 	std::cout<<"BUFF:"<<request.buff<< std::endl;
 	if(request.cmd_id == Insert){
 		createRole(request);
-	}else{
-		formatData(request.fd);
 	}
+	formatData(request.fd);
 }
 
 void Client::createRole(const ClientRequest& request){
@@ -140,13 +139,13 @@ void Client::formatData(int fd){
 			len = 10;
 		std::cout << "len fo list:" << len << std::endl;
 		for(int i=0;i<len;i++){
-			std::cout << "index fo list:" << i<< std::endl;
+			//std::cout << "index fo list:" << i<< std::endl;
 			RoleData roledata = RoleDataList.at(i);
 			deepdf::UserInfo *role = respond->add_users();
 			role->set_name(roledata.name);
 			role->set_score(roledata.score); 
-			std::cout << "name :" << role->name()<< std::endl;
-			std::cout << "score :" << role->score()<< std::endl;
+			//std::cout << "name :" << role->name()<< std::endl;
+			//std::cout << "score :" << role->score()<< std::endl;
 		}
 		std::cout << "to userinfo success:"  << std::endl;
 		int length = respond->ByteSize();
@@ -168,10 +167,10 @@ void Client::sendData(int fd,int cmd_id, char * data, int length){
 	memcpy(datatoh+4,data,length-4);
 	int sendlen = 0;
 	while(sendlen < length){
-		std::cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" <<std::endl;
+	//	std::cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" <<std::endl;
 		sendlen += write(fd, datatoh+sendlen, length-sendlen);
 	}
-	std::cout << "send data success !data:\n" <<data<< std::endl;
+	//std::cout << "send data success !data:\n" <<data<< std::endl;
 
 	short ll = datatoh[0]+(datatoh[1]<<8);
 	std::cout << "serialize length:"<<"++++"<<ll<<std::endl;

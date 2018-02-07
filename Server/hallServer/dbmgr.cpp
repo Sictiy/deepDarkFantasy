@@ -107,15 +107,15 @@ MYSQL_RES* Dbmgr::queryAllScore(){
 			return res_ptr;
 		}
 	}
-
+	std::cout << "select success" << std::endl;
 	return NULL;
 }
 
 std::string Dbmgr::queryScore(std::string name){
-	std::cout << "1" <<std::endl;
+	//std::cout << "1" <<std::endl;
 	std::string str = "select score from user where name = '"+ name +"';";
 	if(!mysql_query(&con, str.c_str())){//为0成功
-		std::cout << "2" <<std::endl;
+		//std::cout << "2" <<std::endl;
 		res_ptr = mysql_store_result(&con);
 		if(res_ptr != NULL)  {
 			if (mysql_num_rows(res_ptr) == 0)
