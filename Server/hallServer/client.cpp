@@ -54,7 +54,7 @@ void Client::createRole(const ClientRequest& request){
 	const char *Buff = request.buff;
 	RoleData newrole;
 	if(USESTRING){
-		std::cout << "get request by string!" << std::endl;
+		//std::cout << "get request by string!" << std::endl;
 		std::vector<std::string> str;
 		splitstr(Buff,",",str);
 		newrole.name = str[0];
@@ -63,12 +63,12 @@ void Client::createRole(const ClientRequest& request){
 			newrole.score = 0;
 		else
 			newrole.score = atoi(str[1].c_str());
-		std::cout << "role data:!" <<newrole.name<<","<<newrole.score<< std::endl;
+		//std::cout << "role data:!" <<newrole.name<<","<<newrole.score<< std::endl;
 		//RoleDataList.push_back(newrole);
 	}else{
 		std::cout << "get request by protobuf!"<< std::endl;
 
-		std::cout <<"recv:len:"<< strlen(Buff)<<"-++-"<<Buff << std::endl;
+		//std::cout <<"recv:len:"<< strlen(Buff)<<"-++-"<<Buff << std::endl;
        /* deepdf::DataResp * resp = new deepdf::DataResp();
         resp->ParseFromArray(Buff,strlen(Buff));
         for(int i=0;i<(resp->users_size());i++){
@@ -106,14 +106,14 @@ void Client::insertRole(const RoleData& role){
 	cmd.data = role;
 	Dbmgr::pushRequest(cmd);
 	//insert into local list;
-	std::cout << "len fo list:" << RoleDataList.size() << std::endl;
+	//std::cout << "len fo list:" << RoleDataList.size() << std::endl;
 	RoleDataList.push_back(role);
-	std::cout << "len fo list:" << RoleDataList.size() << std::endl;
+	//std::cout << "len fo list:" << RoleDataList.size() << std::endl;
 	sort(RoleDataList.begin(),RoleDataList.end(),compare);
 }
 void Client::formatData(int fd){
 	if(USESTRING){
-		std::cout << "sort success!" << std::endl;
+		//std::cout << "sort success!" << std::endl;
 		std::string data=std::string("request:");
 		int len;
 		if (RoleDataList.size()<=10)
@@ -127,17 +127,17 @@ void Client::formatData(int fd){
 			sprintf(score,"%d",roledata.score);
 			data.append(",").append(score);
 		}
-		std::cout << "get data success!listlen: " <<len<< std::endl;
+		//std::cout << "get data success!listlen: " <<len<< std::endl;
 		sendData(fd,s2c_rank_get,(char* )data.c_str(),data.length());
 	}else{
-		std::cout << "sort success ! in protobuf" << std::endl;
+		//std::cout << "sort success ! in protobuf" << std::endl;
 		deepdf::DataResp *respond = new deepdf::DataResp();
 		int len;
 		if(RoleDataList.size()<=10)
 			len = RoleDataList.size();
 		else
 			len = 10;
-		std::cout << "len fo list:" << len << std::endl;
+		//std::cout << "len fo list:" << len << std::endl;
 		for(int i=0;i<len;i++){
 			//std::cout << "index fo list:" << i<< std::endl;
 			RoleData roledata = RoleDataList.at(i);
@@ -147,11 +147,11 @@ void Client::formatData(int fd){
 			//std::cout << "name :" << role->name()<< std::endl;
 			//std::cout << "score :" << role->score()<< std::endl;
 		}
-		std::cout << "to userinfo success:"  << std::endl;
+		//std::cout << "to userinfo success:"  << std::endl;
 		int length = respond->ByteSize();
 		char* data = new char[length];
 		respond->SerializeToArray(data,length);
-		std::cout << "len fo data:" << strlen(data) << std::endl;
+		//std::cout << "len fo data:" << strlen(data) << std::endl;
 		sendData(fd,s2c_rank_get,data,length);
 	}
 }
@@ -172,8 +172,8 @@ void Client::sendData(int fd,int cmd_id, char * data, int length){
 	}
 	//std::cout << "send data success !data:\n" <<data<< std::endl;
 
-	short ll = datatoh[0]+(datatoh[1]<<8);
-	std::cout << "serialize length:"<<"++++"<<ll<<std::endl;
+	//short ll = datatoh[0]+(datatoh[1]<<8);
+	//std::cout << "serialize length:"<<"++++"<<ll<<std::endl;
 }
 /***************************************/
 void Client::selectRole(){

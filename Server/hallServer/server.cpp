@@ -38,7 +38,7 @@ Server::~Server(){
 bool Server::init(){
 	if(createServer("0.0.0.0",SERVERPORT)){
 		//setLog();
-		//setDaemon();
+		setDaemon();
 		return true;
 	}
 	return false;
@@ -124,7 +124,7 @@ int Server::epollLoop(){
 	while(true){
 		nfds = epoll_wait(Epoolfd, events, MAXEVENTSIZE, TIMEWAIT);
 		for(int i = 0; i < nfds; i++){
-			std::cout << "+++++" << nfds << std::endl;
+			std::cout << "fd:+++++" << events[i].data.fd<< std::endl;
 			if(events[i].data.fd == Listenfd){
 				fd = accept(Listenfd, (struct sockaddr*)&client_addr, &client_len);
 				ctlEvent(fd, true);
@@ -140,7 +140,7 @@ int Server::epollLoop(){
 			else if(events[i].events & EPOLLIN){
 				if((fd == events[i].data.fd) < 0) 
 					continue;
-				processTcpPackage(fd);
+				processTcpPackage(events[i].data.fd);
 			}
 		}
 
@@ -199,12 +199,12 @@ void Server::processTcpPackage(int fd){
 	if(cli.offset >= 2){
 		//memcpy(&cli->length,cli->buff,2);
 		cli.length = cli.buff[0]+(cli.buff[1]<<8);
-		std::cout << "new length: " << cli.length << std::endl;
+		//std::cout << "new length: " << cli.length << std::endl;
 	}
-	std::cout << "new offset: " << cli.offset << std::endl;
+	//std::cout << "new offset: " << cli.offset << std::endl;
 	
 	if(cli.offset >= cli.length){ //get all request data
-		std::cout << "get all request data" << std::endl;
+		//std::cout << "get all request data" << std::endl;
 		short length = cli.length;
 		ClientRequest request;
 		request.fd = fd;
@@ -213,17 +213,17 @@ void Server::processTcpPackage(int fd){
 		std::cout << "cmd:" << cmd << std::endl;
 		request.cmd_id = Insert;
 		//memset(request.buff ,0 ,(size_t)MAXLEN);
-		std::cout <<"serialize length: "<< cli.length<<std::endl;
+		//std::cout <<"serialize length: "<< cli.length<<std::endl;
 		memcpy(request.buff,cli.buff+4,length-4);
 		std::cout <<"bufflen:"<< strlen(request.buff)<<std::endl;
 		ClientMgr->pushRequest(request);
 
-		std::cout << "reset cli buff" << std::endl;
+		//std::cout << "reset cli buff" << std::endl;
 		cli.offset -= cli.length;
 		if(cli.offset > 0){
 			memcpy(cli.buff,cli.buff+cli.length,cli.offset);
 		}
 		cli.length = MAXLEN;
-		std::cout <<"new length: "<< cli.length<<std::endl;
+		//std::cout <<"new length: "<< cli.length<<std::endl;
 	}
 }
