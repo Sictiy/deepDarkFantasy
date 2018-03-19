@@ -43,7 +43,7 @@ bool Client::init(){
 }
 
 void Client::processOneRequest(const ClientRequest& request){
-	std::cout<<"BUFF:"<<request.buff<< std::endl;
+	//std::cout<<"BUFF:"<<request.buff<< std::endl;
 	if(request.cmd_id == Insert){
 		createRole(request);
 	}
@@ -94,7 +94,7 @@ void Client::createRole(const ClientRequest& request){
 		MinScore = RoleDataList.back().score;
 	}
 	std::cout << "min-score, new-score:"<<MinScore <<"--"<< newrole.score << std::endl;
-	if((RoleDataList.size() < 10 || MinScore <= newrole.score) && newrole.score>100 && newrole.score<20000 &&newrole.name.length() < 20)
+	if((RoleDataList.size() < 10 || MinScore <= newrole.score) && newrole.score>100 && newrole.score<200000 &&newrole.name.length() < 20)
 		insertRole(newrole);
 }
 
@@ -189,6 +189,11 @@ void Client::pushRespond(const std::vector<RoleData>& vec){  //
 	RoleDataList.assign(vec.begin(),vec.end());
 	GetDbData = true;
 	std::cout << "client:get respond from db" <<std::endl;
+	sort(RoleDataList.begin(),RoleDataList.end(),compare);
+	for(int i=0;i<RoleDataList.size();i++){
+		RoleData roledata = RoleDataList.at(i);
+		std::cout << roledata.name << "+++" << roledata.score << std::endl;
+	}
 }
 
 void Client::getDataFromDB(){
@@ -217,7 +222,7 @@ void Client::process(){
 		if(Requests.empty()){
 			continue;
 		}else{
-			std::cout << "client: start process request!" <<std::endl;
+			//std::cout << "client: start process request!" <<std::endl;
 			processOneRequest(Requests.back());
 			Requests.pop_back();
 			continue;
