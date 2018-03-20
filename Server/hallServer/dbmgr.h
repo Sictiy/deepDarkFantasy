@@ -30,7 +30,7 @@ private:
 
 private:
 	std::thread* Thread;
-	static std::deque<Cmd> cmds;
+	std::deque<Cmd> cmds;
 
 	//new add
 	

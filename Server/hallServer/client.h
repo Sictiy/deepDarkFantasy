@@ -24,6 +24,7 @@ private:
 	void getDataFromDB();
 	void process();
 	void processOneRequest(const ClientRequest& request);
+	void pushCmd(Cmd cmd);
 
 private:
 	int MinScore;
@@ -31,6 +32,8 @@ private:
 	std::thread* Thread;
 	std::vector<RoleData> RoleDataList;
 	std::deque<ClientRequest> Requests;
+
+	std::deque<Cmd> cmds;
 };
 
 #endif

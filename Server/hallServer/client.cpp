@@ -27,6 +27,8 @@ Client::Client(){
 	GetDbData = false;
 	RoleDataList.clear();
 	Requests.clear();
+
+	this->init();
 }
 
 Client::~Client(){
@@ -104,7 +106,7 @@ void Client::insertRole(const RoleData& role){
 	cmd.client = this;
 	cmd.cmd_id = Insert;
 	cmd.data = role;
-	Dbmgr::pushRequest(cmd);
+	pushCmd(cmd);
 	//insert into local list;
 	//std::cout << "len fo list:" << RoleDataList.size() << std::endl;
 	RoleDataList.push_back(role);
@@ -196,6 +198,11 @@ void Client::pushRespond(const std::vector<RoleData>& vec){  //
 	}
 }
 
+
+void Client::Cmd(Cmd cmd){
+	cmds.push_front(cmd);
+}
+
 void Client::getDataFromDB(){
 	std::cout << "client:get data from db 1" <<std::endl;
 	using namespace std::chrono;
@@ -240,4 +247,8 @@ void Client::run(){
 void Client::pushRequest(ClientRequest request){
 	Requests.push_front(request);
 	std::cout << "client: get request!" <<std::endl;
+}
+
+void Client::setCmdDeque(std::deque<Cmd> cmds_in){
+	cmds = cmds_in;
 }

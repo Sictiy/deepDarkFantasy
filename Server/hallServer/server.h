@@ -3,32 +3,21 @@
 
 #include "head.h"
 
-class Server
-{
+class Server{
 public:
-	Server(Client * client);
+	Server();
 	virtual ~Server();
 
 	bool init();
-	void run();
+	//bool createServer(const char* ip, int port);
 
 private:
-	int epollLoop();
-	bool createServer(const char* ip, int port);
-	int setNoblock(int fd);
-	void ctlEvent(int fd, bool flag);
-	void setLog();
+	//void setLog();
 	void setDaemon();
-	void processTcpPackage(int fd);
 
-private:
-	int Epoolfd;
-	int Listenfd;
-	bool Isloop;
-	std::thread* Thread;
-	int64_t Frame;
-	Client * ClientMgr;
-	std::map<int,Cli> ClientMap;
+	std::deque<Cmd> cmds;  //db deque
+	/* data */
 };
+
 
 #endif

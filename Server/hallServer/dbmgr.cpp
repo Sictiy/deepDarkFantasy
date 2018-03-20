@@ -3,6 +3,7 @@
 Dbmgr::Dbmgr(){
 	cmds.clear();
 	RoleDataList.clear();
+	this->init();
 }
 
 Dbmgr::~Dbmgr(){
@@ -24,7 +25,7 @@ bool Dbmgr::init(){
 		std::cout << "connect to db failed!"<<std::endl;
 	}
 }
-
+	
 void Dbmgr::run(){
 	std::cout << "dbserver is runing!" << std::endl;
 	Thread = new std::thread(&Dbmgr::process,this);
@@ -77,6 +78,10 @@ void Dbmgr::respond(Cmd cmd){
 	cmd.client->pushRespond(RoleDataList);
 }
 
+
+void Dbmgr::setCmdDeque(std::deque<Cmd> cmds_in){
+	cmds = cmds_in;
+}
 /**************************************************************************/
 MYSQL_RES* Dbmgr::queryAllScore(){
 	std::string str = "select * from user order by score desc;";/**/
