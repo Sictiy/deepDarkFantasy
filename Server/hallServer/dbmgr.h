@@ -2,6 +2,7 @@
 #define __DBMGR__
 
 #include "client.h"
+#include "msgqueue.h"
 
 class Dbmgr
 {
@@ -10,7 +11,7 @@ public:
 	virtual ~Dbmgr();
 
 	bool init();
-	static void pushRequest(Cmd cmd);
+	//static void pushRequest(Cmd cmd);
 	void run();
 
 	//new add
@@ -19,6 +20,8 @@ public:
 	int getRow();
 	int getClumn();
 	int setRowAndClumn(MYSQL_RES *ptr);
+	void setMsgQueue(MsgQueue *m);
+	// void setCmdDeque(std::deque<Cmd> &cmds_in);
 	std::string queryScore(std::string name);
 	bool insertScore(std::string name, std::string score);
 
@@ -30,7 +33,8 @@ private:
 
 private:
 	std::thread* Thread;
-	std::deque<Cmd> cmds;
+	MsgQueue* msgs;
+	//std::deque<Cmd> cmds;
 
 	//new add
 	

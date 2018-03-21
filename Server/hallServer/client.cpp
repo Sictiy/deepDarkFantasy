@@ -28,7 +28,6 @@ Client::Client(){
 	RoleDataList.clear();
 	Requests.clear();
 
-	this->init();
 }
 
 Client::~Client(){
@@ -106,7 +105,7 @@ void Client::insertRole(const RoleData& role){
 	cmd.client = this;
 	cmd.cmd_id = Insert;
 	cmd.data = role;
-	pushCmd(cmd);
+	msgs->sendMsg(cmd);
 	//insert into local list;
 	//std::cout << "len fo list:" << RoleDataList.size() << std::endl;
 	RoleDataList.push_back(role);
@@ -183,7 +182,8 @@ void Client::selectRole(){
 	Cmd cmd;
 	cmd.client = this;
 	cmd.cmd_id = Select;
-	Dbmgr::pushRequest(cmd);
+	//Dbmgr::pushRequest(cmd);
+	msgs->sendMsg(cmd);
 }
 
 void Client::pushRespond(const std::vector<RoleData>& vec){  //
@@ -199,9 +199,9 @@ void Client::pushRespond(const std::vector<RoleData>& vec){  //
 }
 
 
-void Client::Cmd(Cmd cmd){
-	cmds.push_front(cmd);
-}
+// void Client::pushCmd(Cmd cmd){
+// 	cmds.push_front(cmd);
+// }
 
 void Client::getDataFromDB(){
 	std::cout << "client:get data from db 1" <<std::endl;
@@ -241,7 +241,6 @@ void Client::process(){
 void Client::run(){
 	std::cout << "clientmgr is runing!" <<std::endl;
 	Thread = new std::thread(&Client::process,this);
-	std::cout << "process loop is runing!" <<std::endl;
 }
 
 void Client::pushRequest(ClientRequest request){
@@ -249,6 +248,10 @@ void Client::pushRequest(ClientRequest request){
 	std::cout << "client: get request!" <<std::endl;
 }
 
-void Client::setCmdDeque(std::deque<Cmd> cmds_in){
-	cmds = cmds_in;
+// void Client::setCmdDeque(std::deque<Cmd> &cmds_in){
+// 	cmds = cmds_in;
+// }
+
+void Client::setMsgQueue(MsgQueue *m){
+	msgs = m;
 }

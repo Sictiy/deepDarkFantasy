@@ -1,5 +1,6 @@
 #include "server.h"
 #include "client.h"
+#include "network.h"
 
 Network::Network():
 	Epoolfd(0),
@@ -136,7 +137,7 @@ int Network::epollLoop(){
 	}
 }
 
-void setCliMgr(Client* client){
+void Network::setCliMgr(Client* client){
 	ClientMgr = client;
 }
 

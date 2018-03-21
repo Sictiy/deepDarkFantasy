@@ -1,7 +1,7 @@
 #include "dbmgr.h"
 
 Dbmgr::Dbmgr(){
-	cmds.clear();
+	//cmds.clear();
 	RoleDataList.clear();
 	this->init();
 }
@@ -32,21 +32,27 @@ void Dbmgr::run(){
 	Thread->detach();
 }
 
-void Dbmgr::pushRequest(Cmd cmd){
-	cmds.push_front(cmd);
-}
+// void Dbmgr::pushRequest(Cmd cmd){
+// 	cmds.push_front(cmd);
+// }
 
 void Dbmgr::process(){
 	using namespace std::chrono;
 	while(true){
-		if(cmds.empty())
+		Cmd *cmd = msgs->recvMsg();
+		if(cmd==nullptr)
 			continue;
 		else{
-			Cmd cmd = cmds.back();
-			cmds.pop_back();
-			std::cout << "get a db cmd" <<cmd.cmd_id <<std::endl;
-			processRequest(cmd);
+			std::cout << "get a db cmd" <<cmd->cmd_id <<std::endl;
+			processRequest(*cmd);
 		}
+		// if(cmds.empty())
+		// 	continue;
+		// else{
+		// 	Cmd cmd = cmds.back();
+		// 	cmds.pop_back();
+		// 	processRequest(cmd);
+		// }
 		std::this_thread::sleep_for(milliseconds(100));
 	}
 }
@@ -79,9 +85,9 @@ void Dbmgr::respond(Cmd cmd){
 }
 
 
-void Dbmgr::setCmdDeque(std::deque<Cmd> cmds_in){
-	cmds = cmds_in;
-}
+// void Dbmgr::setCmdDeque(std::deque<Cmd> &cmds_in){
+// 	cmds = cmds_in;
+// }
 /**************************************************************************/
 MYSQL_RES* Dbmgr::queryAllScore(){
 	std::string str = "select * from user order by score desc;";/**/
@@ -155,4 +161,8 @@ int Dbmgr::setRowAndClumn(MYSQL_RES *ptr){
 	column = mysql_num_fields(ptr);
  	row = mysql_num_rows(ptr) + 1;
  	return 1;
+}
+
+void Dbmgr::setMsgQueue(MsgQueue *m){
+	msgs = m;
 }

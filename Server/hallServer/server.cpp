@@ -1,6 +1,8 @@
 #include "server.h"
 #include "client.h"
 #include "network.h"
+#include "dbmgr.h"
+#include "msgqueue.h"
 
 /*******************************************/
 bool loop = true;
@@ -21,12 +23,14 @@ Server::~Server(){
 }
 
 bool Server::init(){
-	Network *network = new Network();
-	Client *client = new Client();
 	Dbmgr *dbmgr = new Dbmgr(); 
+	Client *client = new Client();
+	Network *network = new Network();
+	MsgQueue *msgs = new MsgQueue("cmds");
 
-	dbmgr->setCmdDeque(cmds);
-	client->setCmdDeque(cmds);
+	dbmgr->setMsgQueue(msgs);
+	client->setMsgQueue(msgs);
+	client->init();
 
 	network->setCliMgr(client);
 	if(network->createServer("0.0.0.0",SERVERPORT)){

@@ -3,18 +3,17 @@
 
 #include "head.h"
 
-class Network
-{
+class Network{
 public:
-	Network(Client * client);
+	Network();
 	virtual ~Network();
 
 	void run();
 	void setCliMgr(Client* client);
+	bool createServer(const char* ip, int port);
 
 private:
 	int epollLoop();
-	bool createServer(const char* ip, int port);
 	int setNoblock(int fd);
 	void ctlEvent(int fd, bool flag);
 	void processTcpPackage(int fd);

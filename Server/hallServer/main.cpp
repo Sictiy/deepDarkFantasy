@@ -3,9 +3,9 @@
 #include "client.h"
 
 using namespace std;
-std::deque<Cmd> Dbmgr::cmds;
+// std::deque<Cmd> Dbmgr::cmds;
 int main(int argc, char* argv[]){
-
+	using namespace std::chrono;
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
 
 	ofstream of("log.txt");

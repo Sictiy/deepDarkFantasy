@@ -3,6 +3,7 @@
 
 #include "head.h"
 #include "Protos.pb.h"
+#include "msgqueue.h"
 
 class Client 
 {
@@ -12,6 +13,8 @@ public:
 
 	void pushRespond(const std::vector<RoleData>& vec);
 	void pushRequest(ClientRequest request);
+	void setMsgQueue(MsgQueue *m);
+	// void setCmdDeque(std::deque<Cmd> &cmds_in);
 	void run();
 	bool init();
 
@@ -24,7 +27,7 @@ private:
 	void getDataFromDB();
 	void process();
 	void processOneRequest(const ClientRequest& request);
-	void pushCmd(Cmd cmd);
+	//void pushCmd(Cmd cmd);
 
 private:
 	int MinScore;
@@ -33,7 +36,8 @@ private:
 	std::vector<RoleData> RoleDataList;
 	std::deque<ClientRequest> Requests;
 
-	std::deque<Cmd> cmds;
+	//std::deque<Cmd> cmds;
+	MsgQueue* msgs;
 };
 
 #endif
