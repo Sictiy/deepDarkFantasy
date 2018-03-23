@@ -8,7 +8,7 @@ Network::Network():
 	Thread(nullptr),
 	Frame(0),
 	Isloop(true){
-	ClientMap.clear();
+	PacketMap.clear();
 }
 
 Network::~Network(){
@@ -19,7 +19,7 @@ Network::~Network(){
 	delete Thread;
 	close(Listenfd);
 
-	ClientMap.clear();
+	PacketMap.clear();
 	delete ClientMgr;
 	std::cout << "close server!"<<std::endl;
 }
@@ -69,12 +69,14 @@ void Network::ctlEvent(int fd, bool flag){
 	epoll_ctl(Epoolfd, flag ? EPOLL_CTL_ADD : EPOLL_CTL_DEL, fd, &ev);
 	if(flag){
 		setNoblock(fd);
-		Cli newcli;
-		newcli.fd = fd;
-		newcli.offset = 0;
-		newcli.length = MAXLEN;
+		// Cli newcli;
+		// newcli.fd = fd;
+		// newcli.offset = 0;
+		// newcli.length = MAXLEN;
 		//memset(&newcli,0,sizeof(Cli));
-		ClientMap[fd] = newcli;
+		// ClientMap[fd] = newcli;
+		Packet* packet = new Packet(fd);
+		PacketMap[fd] = packet;
 		if(nullptr == ClientMgr){
 			std::cout << "init ClientMgr"<< std::endl;
 			ClientMgr = new Client();
@@ -86,7 +88,7 @@ void Network::ctlEvent(int fd, bool flag){
 	else{
 		close(fd);
 		//delete ClientMap[fd];
-		ClientMap.erase(fd);
+		PacketMap.erase(fd);
 		std::cout << fd << " exit from loop." << std::endl;
 	}
 }
@@ -156,42 +158,18 @@ void Network::run(){
 
 void Network::processTcpPackage(int fd){
 	std::cout << "get data from:" << fd << std::endl;
-	Cli cli = ClientMap[fd];
-	int readlen = read(fd, cli.buff+cli.offset, MAXLEN-cli.offset);
-	cli.offset += readlen;
-	if(cli.offset <= 0){
-		ctlEvent(fd, false);
-		return ;
-	}
-
-	if(cli.offset >= 2){
-		//memcpy(&cli->length,cli->buff,2);
-		cli.length = cli.buff[0]+(cli.buff[1]<<8);
-		//std::cout << "new length: " << cli.length << std::endl;
-	}
-	//std::cout << "new offset: " << cli.offset << std::endl;
-	
-	if(cli.offset >= cli.length){ //get all request data
-		//std::cout << "get all request data" << std::endl;
-		short length = cli.length;
-		ClientRequest request;
-		request.fd = fd;
-
-		short cmd = cli.buff[2]+(cli.buff[3]<<8);
-		std::cout << "cmd:" << cmd << std::endl;
-		request.cmd_id = Insert;
-		//memset(request.buff ,0 ,(size_t)MAXLEN);
-		//std::cout <<"serialize length: "<< cli.length<<std::endl;
-		memcpy(request.buff,cli.buff+4,length-4);
-		std::cout <<"bufflen:"<< strlen(request.buff)<<std::endl;
-		ClientMgr->pushRequest(request);
-
-		//std::cout << "reset cli buff" << std::endl;
-		cli.offset -= cli.length;
-		if(cli.offset > 0){
-			memcpy(cli.buff,cli.buff+cli.length,cli.offset);
-		}
-		cli.length = MAXLEN;
-		//std::cout <<"new length: "<< cli.length<<std::endl;
+	Packet *packet = PacketMap[fd];
+	switch(packet->addPacket(fd)){
+		case -1:
+			ctlEvent(fd,false);
+			break;
+		case 1:
+			ClientRequest request;
+			request.fd = packet->getFd();
+			request.cmd_id = packet->getCmd();
+			memcpy(request.buff,packet->getBuff(),packet->getLength());
+			ClientMgr->pushRequest(request);
+			break;
+		default:;
 	}
 }

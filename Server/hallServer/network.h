@@ -2,6 +2,7 @@
 #define __NETWORK__
 
 #include "head.h"
+#include "packet.h"
 
 class Network{
 public:
@@ -25,7 +26,8 @@ private:
 	std::thread* Thread;
 	int64_t Frame;
 	Client * ClientMgr;
-	std::map<int,Cli> ClientMap;
+	std::map<int,Packet*> PacketMap;
+	//std::map<int,Cli> ClientMap;
 };
 
 #endif
