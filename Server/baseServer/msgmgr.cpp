@@ -1,0 +1,73 @@
+#include "msgmgr.h"
+
+MsgMgr::MsgMgr(){
+	
+}
+
+MsgMgr::~MsgMgr(){
+
+}
+
+void MsgMgr::init(){
+	msgs = new MsgQueue("msgs");
+	run();
+}
+
+void MsgMgr::run(){
+	std::cout << "msgmgr is runing!"<<std::endl;	
+	Thread = new std::thread(&MsgMgr::process,this);
+}
+
+void MsgMgr::process(){
+	using namespace std::chrono;
+	while(true){
+		Msg *msg = msgs->recvMsg();
+		if(cmd==nullptr)
+			continue;
+		else{
+			dispatchMsg(msg);
+		}
+		std::this_thread::sleep_for(milliseconds(100));
+	}
+}
+
+void MsgMgr::addMsg(Msg *msg){
+	msgs->sendMsg(msg);
+}
+
+void MsgMgr::addHandler(int cmd,Handler *handler){
+  	if (handler == NULL)
+    	return;
+	auto pair = handler_map_.insert(std::make_pair(cmd, HandlerList()));
+	auto it = pair.first;
+	if (it == handler_map_.end())
+		return;
+	it->second.push_back(handler);
+}
+
+void MsgMgr::removeHandler(int cmd,Handler *handler){
+	if (handler == NULL)
+		return;
+	auto it = handler_map_.find(cmd);
+	if (it == handler_map_.end())
+		return;
+	auto listIt = std::find(it->second.begin(), it->second.end(), handler);
+	if (listIt != it->second.end())
+		it->second.erase(listIt);
+}
+
+void MsgMgr::clearHandler(int cmd){
+	handler_map_.erase(cmd);
+}
+
+void MsgMgr::dispatchMsg(Msg *msg){
+	auto it = handler_map_.find(msg->cmd);
+	if (it == handler_map_.end())
+		return;
+	auto &handler_list = it->second;
+	for (auto listIt = handler_list.begin();listIt != handler_list.end();listIt++){
+		if ((*listIt)==NULL)
+			continue;
+		(*listIt)->handleMsg(msg);
+	}
+}
