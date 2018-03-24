@@ -13,12 +13,12 @@ public:
 	short getLength();
 	char* getBuff();
 	int getFd();
-	Cmd_id getCmd();
+	int getCmd();
 	short getType();
 
 private:
 	int fd;
-	Cmd_id cmd;
+	int cmd;
 	short type;
 	char buff[MAXLEN];
 	char cache[MAXLEN];
