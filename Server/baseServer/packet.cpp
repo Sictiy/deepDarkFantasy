@@ -25,7 +25,7 @@ int Packet::addPacket(int fd){
 	if(offset >= length){ //get all request data
 		short cmd =cache[2]+(cache[3]<<8);
 		std::cout << "cmd:" << cmd << std::endl;
-		cmd = Insert;
+		cmd = c2s_rank_get;
 		memcpy(buff,cache+4,length-4);
 		std::cout <<"bufflen:"<< strlen(buff)<<std::endl;
 		//add packet to client
@@ -56,6 +56,6 @@ int Packet::getFd(){
 	return fd;
 }
 
-Cmd_id Packet::getCmd(){
+int Packet::getCmd(){
 	return cmd;
 }
