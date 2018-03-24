@@ -3,7 +3,6 @@
 
 #include "head.h"
 #include "handler.h"
-#include "msg.h"
 #include "msgqueue.h"
 
 typedef std::list<Handler *> HandlerList;
