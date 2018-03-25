@@ -61,9 +61,9 @@ void Packet::sendMsg(int fd,const Msg* msg){
 	}
 }
 
-short Packet::getType(){
-	return type;
-}
+// short Packet::getType(){
+// 	return type;
+// }
 
 short Packet::getLength(){
 	return length;
