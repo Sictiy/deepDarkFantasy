@@ -1,0 +1,11 @@
+package deepdf;
+message UserInfo
+{
+	optional string name = 1;
+	optional uint32 score = 2; 	
+}
+
+message DataResp
+{
+	repeated UserInfo users = 1;
+}
