@@ -14,14 +14,14 @@ public:
 	char* getBuff();
 	int getFd();
 	int getCmd();
-	short getType();
+	//short getType();
 	static void sendMsg(int fd,const Msg *msg);
 	Msg recvMsg();
 
 private:
 	int fd;
 	short cmd;
-	short type;
+	//short type;
 	char buff[MAXLEN];
 	char cache[MAXLEN];
 

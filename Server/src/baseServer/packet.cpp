@@ -4,7 +4,7 @@ Packet::Packet(int _fd){
 	fd = _fd;
 	offset = 0;
 	length = MAXLEN;
-	type = 0;
+	//type = 0;
 }
 
 Packet::~Packet(){
