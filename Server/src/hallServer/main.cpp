@@ -10,9 +10,9 @@ int main(int argc, char* argv[]){
 	streambuf* fileBuf = of.rdbuf();
 	cout.rdbuf(fileBuf);
 
-	Server *server = new Server();
+	// Server *server = new Server();
 	
-	if(server->init()){
+	if(server.init()){
 		while(true){
 			std::this_thread::sleep_for(milliseconds(2000));
 		}
