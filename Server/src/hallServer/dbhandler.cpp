@@ -48,6 +48,7 @@ void DbHandler::selectRank(int fd){
 void DbHandler::sendDataToDb(int cmd, char *buff){
 	Msg *msg;
 	msg->cmd = h2d_insert;
+	msg->fd = dbFd;
 	memcpy(msg->buff,buff,strlen(buff));
 	DbHandler::sendMsg(msg);
 }
