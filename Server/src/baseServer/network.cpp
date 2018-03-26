@@ -172,7 +172,7 @@ void Network::processTcpPackage(int fd){
 			ctlEvent(fd,false);
 			break;
 		case 1:
-			Msg msg;
+			Msg msg ;
 			msg = packet->recvMsg();
 			msgMgr.addMsg(&msg);
 			break;
