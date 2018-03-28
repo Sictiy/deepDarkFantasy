@@ -19,7 +19,9 @@ int Packet::addPacket(int fd){
 	}
 
 	if(offset >= 2){
-		length = cache[0]+(cache[1]<<8);
+		memcpy(&length,cache,2);
+		std::cout << "length:" << length << "++" << cache[0]+(cache[1])<< std::endl;
+		// length = cache[0]+(cache[1]<<8);
 	}
 	
 	if(offset >= length){ //get all request data

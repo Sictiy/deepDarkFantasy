@@ -23,7 +23,7 @@ void Dbmgr::insert(Msg *msg){
 	deepdf::UserInfo *role = new deepdf::UserInfo() ;
 	role->ParseFromArray(msg->buff,strlen(msg->buff));
 	// std::cout <<"new role:"<< role->name()<<"--"<<role->score()<<std::endl;
- 	insertScore(std::string(role->name()),std::to_string(role->score()));
+ 	// std::cout << insertScore(std::string(role->name()),std::to_string(role->score()))  << std::endl;
 }
 
 void Dbmgr::select(int fd){
@@ -97,8 +97,8 @@ std::string Dbmgr::queryScore(std::string name){
 }
 
 bool Dbmgr::insertScore(std::string name, std::string score){
-	std::cout << "dbmgr : insert score" <<name<<"---"<<score<<std::endl;
 	std::string str = "insert into user values('"+ name +"','"+ score +"');";
+	std::cout << str << std::endl;
 	return !mysql_query(&con, str.c_str());
 }
 
