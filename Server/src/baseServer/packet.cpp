@@ -21,7 +21,7 @@ int Packet::addPacket(int fd){
 	if(offset >= 2){
 		// length = cache[0]+(cache[1]<<8);
 		memcpy(&length,cache,2);
-		std::cout << "bufflen :" << length <<std::endl;
+		std::cout << "bufflen :" << length <<"--"<<cache[0]+(cache[1]<<8)<<std::endl;
 	}
 	
 	if(offset >= length){ //get all request data
@@ -46,6 +46,7 @@ Msg Packet::recvMsg(){
 	msg.fd = getFd();
 	msg.cmd = getCmd();
 	memcpy(msg.buff,getBuff(),strlen(getBuff()));
+	bzero(getBuff(),strlen(getBuff()));
 	return msg;
 }
 
