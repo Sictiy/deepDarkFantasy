@@ -38,9 +38,9 @@ void Dbmgr::select(int fd){
 	}
 	int length = respond->ByteSize();
 	char* data = new char[length];
+	bzero(data,length);
 	respond->SerializeToArray(data,length);
-
-	std::cout << "data length:" <<strlen(data)<< std::endl;
+	std::cout << "count of role:"<< RoleDataList.size() <<" length:"<<length<< std::endl;
 	HallHandler::sendData(fd,d2h_get,data);
 }
 /**************************************************************************/
