@@ -17,7 +17,7 @@ int main(int argc, char* argv[]){
 			std::this_thread::sleep_for(milliseconds(2000));
 		}
 	}
-
+	std::cout << "init server failed! " << std::endl;
 	of.flush();
 	of.close();
 

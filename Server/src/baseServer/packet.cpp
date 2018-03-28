@@ -27,6 +27,8 @@ int Packet::addPacket(int fd){
 		std::cout << "cmd:" << cmd << std::endl;
 		memcpy(buff,cache+4,length-4);
 		std::cout <<"bufflen:"<< strlen(buff)<<std::endl;
+		// std::cout <<"buff:"<< buff<<std::endl;
+
 		//add packet to client
 
 		offset -= length;
@@ -44,6 +46,7 @@ Msg Packet::recvMsg(){
 	msg.fd = getFd();
 	msg.cmd = getCmd();
 	memcpy(msg.buff,getBuff(),strlen(getBuff()));
+	bzero(getBuff(),strlen(getBuff()));
 	return msg;
 }
 
