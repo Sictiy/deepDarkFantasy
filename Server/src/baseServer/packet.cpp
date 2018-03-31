@@ -4,6 +4,7 @@ Packet::Packet(int _fd){
 	fd = _fd;
 	offset = 0;
 	length = MAXLEN;
+	bzero(buff,strlen(buff));
 	//type = 0;
 }
 
@@ -21,8 +22,8 @@ int Packet::addPacket(int fd){
 	if(offset >= 2){
 		memcpy(&length,cache,2);
 		std::cout << "length:" << length << "++" <<std::bitset<16>(length)<< std::endl;
-		std::cout << "length:" << (unsigned short)cache[0] << "++" <<std::bitset<16>(cache[0])<< std::endl;
-		std::cout << "length:" << (cache[1]<<8) << "++" <<std::bitset<16>((cache[1]<<8))<< std::endl;
+		//std::cout << "length:" << (unsigned short)cache[0] << "++" <<std::bitset<16>(cache[0])<< std::endl;
+		//std::cout << "length:" << (cache[1]<<8) << "++" <<std::bitset<16>((cache[1]<<8))<< std::endl;
 		// length = cache[0]+(cache[1]<<8);
 	}
 	
