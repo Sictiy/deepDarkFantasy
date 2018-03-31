@@ -23,7 +23,7 @@ void Dbmgr::insert(Msg *msg){
 	deepdf::UserInfo *role = new deepdf::UserInfo() ;
 	role->ParseFromArray(msg->buff,strlen(msg->buff));
 	// std::cout <<"new role:"<< role->name()<<"--"<<role->score()<<std::endl;
- 	std::cout << insertScore(std::string(role->name()),std::to_string(role->score()))  << std::endl;
+ 	insertScore(std::string(role->name()),std::to_string(role->score())) ; 
 }
 
 void Dbmgr::select(int fd){
