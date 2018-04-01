@@ -1,5 +1,6 @@
 #include "dbhandler.h"
 #include "client.h"
+#include "server.h"
 
 DbHandler::DbHandler(){
 
@@ -27,7 +28,7 @@ void DbHandler::getRank(Msg *msg){
 	deepdf::DataResp *resp = new deepdf::DataResp();
 	resp->ParseFromArray(msg->buff,strlen(msg->buff));
     for(int i=0;i<(resp->users_size());i++){
-        deepdf::UserInfo  role = resp->users(i);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+        deepdf::UserInfo  role = resp->users[i];
         RoleData roledata;
         roledata.name = role.name();
         roledata.score = role.score();
@@ -37,18 +38,17 @@ void DbHandler::getRank(Msg *msg){
 	delete resp;
 }
 
-void DbHandler::selectRank(int fd){
+void DbHandler::selectRank(){
 	Msg msg;
 	msg.cmd = h2d_get;
-	msg.fd = fd;
+	msg.fd = server.getDbFd();
 	DbHandler::sendMsg(&msg);
-	dbFd = fd;
 }
 
 void DbHandler::sendDataToDb(int cmd, char *buff){
 	Msg *msg;
 	msg->cmd = h2d_insert;
-	msg->fd = dbFd;
+	msg->fd = server.getDbFd();
 	memcpy(msg->buff,buff,strlen(buff));
 	DbHandler::sendMsg(msg);
 }

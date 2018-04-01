@@ -17,6 +17,7 @@ void CliHandler::handleMsg(Msg *msg){
 			break;
 		case c2s_rank_get:
 			Iclient.insert(msg);
+			delete msg;
 			break;
 		default:
 			break;

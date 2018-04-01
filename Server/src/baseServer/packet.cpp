@@ -19,14 +19,16 @@ int Packet::addPacket(int fd){
 	}
 
 	if(offset >= 2){
-		length = cache[0]+(cache[1]<<8);
+		// length = cache[0]+(cache[1]<<8);
+		memcpy(&length,cache,2);
+		std::cout << "bufflen :" << length <<"--"<<cache[0]+(cache[1]<<8)<<std::endl;
 	}
 	
 	if(offset >= length){ //get all request data
 		cmd =cache[2]+(cache[3]<<8);
 		std::cout << "cmd:" << cmd << std::endl;
 		memcpy(buff,cache+4,length-4);
-		std::cout <<"bufflen:"<< strlen(buff)<<std::endl;
+		// std::cout <<"bufflen:"<< strlen(buff)<<std::endl;
 		//add packet to client
 
 		offset -= length;
@@ -44,20 +46,23 @@ Msg Packet::recvMsg(){
 	msg.fd = getFd();
 	msg.cmd = getCmd();
 	memcpy(msg.buff,getBuff(),strlen(getBuff()));
+	bzero(getBuff(),strlen(getBuff()));
 	return msg;
 }
 
 void Packet::sendMsg(int fd,const Msg* msg){
-	short length = strlen(msg->buff)+4;
-	std::cout << "send length:" << length<< "	fd:"<<fd<<std::endl;
-	char * datatoh = new char[length];
+	short len = strlen(msg->buff)+4;
+	char * datatoh = new char[len];
+
     bzero(datatoh,strlen(datatoh));
-	memcpy(datatoh,&length,2);
+	memcpy(datatoh,&len,2);
 	memcpy(datatoh+2,&(msg->cmd),2);
-	memcpy(datatoh+4,msg->buff,length-4);
+	memcpy(datatoh+4,msg->buff,len-4);
+
+	std::cout << "send length:" << len<< " fd:"<<fd<<std::endl;
 	int sendlen = 0;
-	while(sendlen < length){
-		sendlen += write(fd, datatoh+sendlen, length-sendlen);
+	while(sendlen < len){
+		sendlen += write(fd, datatoh+sendlen, len-sendlen);
 	}
 }
 
