@@ -23,7 +23,7 @@ void Dbmgr::insert(Msg *msg){
 	deepdf::UserInfo *role = new deepdf::UserInfo() ;
 	role->ParseFromArray(msg->buff,strlen(msg->buff));
 	// std::cout <<"new role:"<< role->name()<<"--"<<role->score()<<std::endl;
- 	insertScore(std::string(role->name()),std::to_string(role->score()));
+ 	insertScore(std::string(role->name()),std::to_string(role->score())) ; 
 }
 
 void Dbmgr::select(int fd){
@@ -38,9 +38,9 @@ void Dbmgr::select(int fd){
 	}
 	int length = respond->ByteSize();
 	char* data = new char[length];
+	bzero(data,length);
 	respond->SerializeToArray(data,length);
-
-	std::cout << "data length:" <<strlen(data)<< std::endl;
+	std::cout << "count of role:"<< RoleDataList.size() <<" length:"<<length<< std::endl;
 	HallHandler::sendData(fd,d2h_get,data);
 }
 /**************************************************************************/
@@ -97,8 +97,8 @@ std::string Dbmgr::queryScore(std::string name){
 }
 
 bool Dbmgr::insertScore(std::string name, std::string score){
-	std::cout << "dbmgr : insert score" <<name<<"---"<<score<<std::endl;
 	std::string str = "insert into user values('"+ name +"','"+ score +"');";
+	std::cout << str << std::endl;
 	return !mysql_query(&con, str.c_str());
 }
 
