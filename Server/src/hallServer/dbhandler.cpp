@@ -28,7 +28,7 @@ void DbHandler::getRank(Msg *msg){
 	deepdf::DataResp *resp = new deepdf::DataResp();
 	resp->ParseFromArray(msg->buff,strlen(msg->buff));
     for(int i=0;i<(resp->users_size());i++){
-        deepdf::UserInfo  role = resp->users[i];
+        deepdf::UserInfo  role = resp->users(i);
         RoleData roledata;
         roledata.name = role.name();
         roledata.score = role.score();

@@ -34,7 +34,7 @@
 
 #define m_ip "127.0.0.1"
 #define m_mysql_usr "root"
-#define m_mysql_pw "qwer1234!"
+#define m_mysql_pw "123123"
 #define m_database "deepdf"
 
 #define fd_newconnect 0
