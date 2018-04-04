@@ -1,5 +1,5 @@
 # this is the directory of server
-# the directory
+## the directory
 > Server
 >> build
 - bin
@@ -11,6 +11,6 @@
 - hallServer
 - gameServer
 
-# make and run
+## make and run
 - run make.sh to make project
 - run start.sh to run
