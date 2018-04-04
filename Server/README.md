@@ -2,9 +2,9 @@
 # the directory
 > Server
 >> build
->>> bin
->>> make.sh
->>> start.sh
+- bin
+- make.sh
+- start.sh
 >> src
 >>> baseServer
 >>> dbServer
