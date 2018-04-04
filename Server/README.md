@@ -6,10 +6,10 @@
 - make.sh
 - start.sh
 >> src
->>> baseServer
->>> dbServer
->>> hallServer
->>> gameServer
+- baseServer
+- dbServer
+- hallServer
+- gameServer
 
 # make and run
 - run make.sh to make project
