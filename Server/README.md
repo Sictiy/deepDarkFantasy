@@ -12,5 +12,5 @@
 - gameServer
 
 # make and run
--- run make.sh to make project
--- run start.sh to run
+- run make.sh to make project
+- run start.sh to run
