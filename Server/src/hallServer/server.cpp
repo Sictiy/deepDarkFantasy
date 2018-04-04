@@ -6,7 +6,7 @@
 
 /*******************************************/
 bool loop = true;
-int DbHandler::dbFd = 0;
+// int DbHandler::dbFd = 0;
 void sig_handler( int sig )
 {
     if ( sig == SIGINT ||sig == SIGQUIT||sig == SIGTERM)
@@ -31,13 +31,12 @@ bool Server::init(){
 
 		msgMgr.init();
 		registerHandler();
-		int dbFd =  network->connectServer("127.0.0.1",DBPORT);
-		std::cout << "connectDbServer,fd:" << dbFd << std::endl;
-
-		// DbHandler::dbFd = dbFd;
-		DbHandler::selectRank(dbFd);
 
 		network->run();
+		dbFd =  network->connectServer("127.0.0.1",DBPORT);
+		std::cout << "connectDbServer,fd:" << dbFd << std::endl;
+
+		DbHandler::selectRank();
 		return true;
 	}
 
@@ -65,4 +64,8 @@ void Server::setDaemon(){
 	signal(SIGINT, sig_handler);
 	signal(SIGTERM, sig_handler);
 	signal(SIGQUIT, sig_handler);
+}
+
+int Server::getDbFd(){
+	return dbFd;
 }

@@ -17,8 +17,10 @@
 #include <thread>
 #include <map>
 #include <list>
+#include <iomanip>
 #include <vector>
 #include <deque>
+#include <bitset>
 #include <algorithm>
 #include <fstream>
 #include <mysql.h>

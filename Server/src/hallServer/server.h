@@ -6,9 +6,14 @@
 class Server{
 public:
 	Server();
+	static Server &Instance(){
+		static Server _inst;
+		return _inst;
+	}
 	virtual ~Server();
 
 	bool init();
+	int getDbFd();
 	//bool createServer(const char* ip, int port);
 
 private:
@@ -16,11 +21,13 @@ private:
 	void setDaemon();
 	void registerHandler();
 	void clearHandler();
+	int dbFd;
 	//bool connectDbServer(const char* ip, int port);
 
 	//std::deque<Cmd> cmds;  //db deque
 	/* data */
 };
 
+#define server Server::Instance()
 
 #endif

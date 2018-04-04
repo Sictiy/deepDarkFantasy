@@ -141,7 +141,7 @@ int Network::epollLoop(){
 		steady_clock::time_point tpNow = steady_clock::now();
         milliseconds dur = duration_cast<milliseconds>(tpNow - tpBegin);
 
-        if (dur.count() * 30 < Frame * 1000)
+        if (dur.count() * 1 < Frame * 1000)
         {
             std::this_thread::sleep_for(milliseconds(100));
             continue;
@@ -172,7 +172,7 @@ void Network::processTcpPackage(int fd){
 			ctlEvent(fd,false);
 			break;
 		case 1:
-			Msg msg;
+			Msg msg ;
 			msg = packet->recvMsg();
 			msgMgr.addMsg(&msg);
 			break;
