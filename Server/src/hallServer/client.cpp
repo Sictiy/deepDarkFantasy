@@ -63,6 +63,7 @@ void Client::insert(Msg *msg){
 	std::cout << "min-score, new-score:"<<MinScore <<"--"<< newrole.score << std::endl;
 	if((RoleDataList.size() < 10 || MinScore <= newrole.score) && newrole.score>100 && newrole.score<200000 &&newrole.name.length() < 20)
 		insertRole(newrole);
+    formatData(msg->fd);
 }
 
 void Client::formatData(int fd){

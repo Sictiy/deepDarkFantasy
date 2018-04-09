@@ -37,6 +37,11 @@ bool Network::createServer(const char* ip, int port){
             m_addr = INADDR_ANY;
     }
 
+    int flag = 1;  
+    if (-1 == setsockopt(Listenfd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag))) {  
+        std::cout<< "setsockeopt failed "<< std::endl;
+    }  
+
 	struct sockaddr_in server_addr;
 	memset(&server_addr, 0 , sizeof(sockaddr_in));  //set zero
 	server_addr.sin_family = AF_INET;

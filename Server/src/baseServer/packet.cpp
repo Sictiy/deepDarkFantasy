@@ -58,6 +58,7 @@ Msg Packet::recvMsg(){
 void Packet::sendMsg(int fd,const Msg* msg){
 	short length = strlen(msg->buff)+4;
 	std::cout << "send length:" << length<< "	fd:"<<fd<<std::endl;
+    std::cout << "length:" << length << "++" <<std::bitset<16>(length)<< std::endl;
 	char * datatoh = new char[length];
     bzero(datatoh,strlen(datatoh));
 	memcpy(datatoh,&length,2);
