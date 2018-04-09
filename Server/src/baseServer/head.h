@@ -34,6 +34,7 @@
 #define GMAEPORT 5052
 #define USESTRING false
 #define MAXLEN 1024*4
+#define FPS 60
 
 #define time_out 1
 

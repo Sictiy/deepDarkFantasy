@@ -21,14 +21,18 @@ void MsgMgr::run(){
 void MsgMgr::process(){
 	using namespace std::chrono;
 	while(true){
+		steady_clock::time_point tpBegin = steady_clock::now();
 		Msg *msg = msgs->recvMsg();
-		if(msg==nullptr)
-			continue;
-		else{
+		if(msg!=nullptr){
 			std::cout << "get a new msg! cmd:" <<msg->cmd<< std::endl;
 			dispatchMsg(msg);
 		}
-		std::this_thread::sleep_for(milliseconds(100));
+		milliseconds dur;
+        do{
+			steady_clock::time_point tpNow = steady_clock::now();
+	        dur = duration_cast<milliseconds>(tpNow - tpBegin);
+            std::this_thread::sleep_for(milliseconds(10));
+        }while (dur.count() * FPS < 1000);
 	}
 }
 

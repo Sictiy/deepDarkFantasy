@@ -164,8 +164,8 @@ int Network::epollLoop(){
         do{
 			steady_clock::time_point tpNow = steady_clock::now();
 	        dur = duration_cast<milliseconds>(tpNow - tpBegin);
-            std::this_thread::sleep_for(milliseconds(100));
-        }while (dur.count() * 1 < 1000);
+            std::this_thread::sleep_for(milliseconds(10));
+        }while (dur.count() * FPS < 1000);
 
         // Frame++;
 	}
