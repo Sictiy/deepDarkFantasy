@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <string.h>
@@ -36,7 +37,7 @@
 
 #define m_ip "127.0.0.1"
 #define m_mysql_usr "root"
-#define m_mysql_pw "xlm104600"
+#define m_mysql_pw "qwer1234!"
 #define m_database "deepdf"
 
 #define fd_newconnect 0

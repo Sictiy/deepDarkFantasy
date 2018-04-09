@@ -42,6 +42,14 @@ bool Network::createServer(const char* ip, int port){
         std::cout<< "setsockeopt failed "<< std::endl;
     }  
 
+    int		keepIdle = 600;
+	int 	keepInterval = 10;
+	int 	keepCount = 10;
+	setsockopt(Listenfd, SOL_TCP, TCP_KEEPIDLE, (void *)&keepIdle, sizeof(keepIdle));
+	setsockopt(Listenfd, SOL_TCP,TCP_KEEPINTVL, (void *)&keepInterval, sizeof(keepInterval));
+	setsockopt(Listenfd, SOL_TCP, TCP_KEEPCNT, (void *)&keepCount, sizeof(keepCount));
+
+
 	struct sockaddr_in server_addr;
 	memset(&server_addr, 0 , sizeof(sockaddr_in));  //set zero
 	server_addr.sin_family = AF_INET;
