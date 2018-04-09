@@ -1,6 +1,16 @@
 //#include "server.h"
 #include "network.h"
 
+std::string getTime(){
+    time_t timep;
+    time (&timep);
+    char tmp[64];
+    strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S --- ",localtime(&timep));
+    return tmp;
+}
+
+/*****************************************************************************************/
+
 Network::Network():
 	Epoolfd(0),
 	Listenfd(0),
@@ -16,7 +26,7 @@ Network::~Network(){
 		Thread->join();
 	}
 	delete Thread;
-	close(Listenfd);
+	close(Listenfd);gg
 
 	PacketMap.clear();
 	std::cout << "close network!"<<std::endl;
@@ -131,7 +141,7 @@ int Network::epollLoop(){
 	while(true){
 		nfds = epoll_wait(Epoolfd, events, MAXEVENTSIZE, TIMEWAIT);
 		for(int i = 0; i < nfds; i++){
-			std::cout << "get msg event form fd:" << events[i].data.fd<< std::endl;
+			std::cout <<getTime()<< "get msg event form fd:" << events[i].data.fd<< std::endl;
 			if(events[i].data.fd == Listenfd){
 				fd = accept(Listenfd, (struct sockaddr*)&client_addr, &client_len);
 				ctlEvent(fd, true);

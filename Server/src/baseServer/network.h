@@ -4,6 +4,7 @@
 #include "head.h"
 #include "packet.h"
 #include "msgmgr.h"
+#include "time.h"
 
 class Network{
 public:
