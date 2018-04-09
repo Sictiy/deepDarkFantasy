@@ -35,12 +35,15 @@
 #define USESTRING false
 #define MAXLEN 1024*4
 
+#define time_out 1
+
 #define m_ip "127.0.0.1"
 #define m_mysql_usr "root"
 #define m_mysql_pw "qwer1234!"
 #define m_database "deepdf"
 
 #define fd_newconnect 0
+#define breathe_cmd 7
 #define c2s_rank_get  1 
 #define s2c_rank_get  2
 #define	h2d_get 3
@@ -61,4 +64,8 @@ struct RoleData{
 	uint score;
 };
  
+struct Connect{
+	int fd;
+	int count;
+};
 #endif

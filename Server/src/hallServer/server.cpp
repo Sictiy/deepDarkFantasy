@@ -38,6 +38,7 @@ bool Server::init(){
 		DbHandler::selectRank(dbFd);
 
 		network->run();
+		new std::thread(&DbHandler::breatheToDb);
 		return true;
 	}
 

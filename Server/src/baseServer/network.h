@@ -20,6 +20,9 @@ private:
 	int setNoblock(int fd);
 	void ctlEvent(int fd, bool flag);
 	void processTcpPackage(int fd);
+	void processBreathe(const Msg &);
+	void breathe();
+	void newConnect(int fd);
 
 private:
 	int Epoolfd;
@@ -28,6 +31,7 @@ private:
 	std::thread* Thread;
 	int64_t Frame;
 	std::map<int,Packet*> PacketMap;
+	std::map<int,Connect> connections;
 };
 
 #endif

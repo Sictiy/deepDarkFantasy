@@ -117,13 +117,17 @@ void Network::ctlEvent(int fd, bool flag){
 		Packet* packet = new Packet(fd);
 		PacketMap[fd] = packet;
 		
-		if(fd != Listenfd)
-			std::cout <<"fd:"<< fd << " add to loop." << std::endl;
+		if(fd != Listenfd){
+			std::cout <<"fd:"<< fd << " add to loop." << std::endl;			
+		}
 	}
 	else{
 		close(fd);
 		//delete ClientMap[fd];
 		PacketMap.erase(fd);
+
+		connections.erase(fd);
+
 		std::cout <<"fd:"<< fd << " exit from loop." << std::endl;
 	}
 }
@@ -148,11 +152,7 @@ int Network::epollLoop(){
 				char ipAddress[INET_ADDRSTRLEN];
 				std::cout << "accept connection from :"<<inet_ntop(AF_INET, &client_addr.sin_addr, ipAddress, sizeof(ipAddress))<<":"<<ntohs(client_addr.sin_port)<< std::endl;
 
-				Msg * msg = new Msg;
-				msg->fd = fd;
-				msg->cmd = fd_newconnect;
-				memset(msg->buff,0,(size_t)2048);
-				msgMgr.addMsg(msg);     
+				newConnect(fd);
 			}
 			else if(events[i].events & EPOLLIN){
 				if((fd == events[i].data.fd) < 0) 
@@ -160,15 +160,12 @@ int Network::epollLoop(){
 				processTcpPackage(events[i].data.fd);
 			}
 		}
-
-		steady_clock::time_point tpNow = steady_clock::now();
-        milliseconds dur = duration_cast<milliseconds>(tpNow - tpBegin);
-
-        if (dur.count() * 1 < Frame * 1000)
-        {
+		milliseconds dur;
+        do{
+			steady_clock::time_point tpNow = steady_clock::now();
+	        dur = duration_cast<milliseconds>(tpNow - tpBegin);
             std::this_thread::sleep_for(milliseconds(100));
-            continue;
-        }
+        }while (dur.count() * 1 < Frame * 1000);
 
         Frame++;
 	}
@@ -184,6 +181,8 @@ int Network::setNoblock(int fd){
 void Network::run(){
 	std::cout << "network is runing!" <<std::endl;
 	Thread = new std::thread(&Network::epollLoop, this);
+
+	new std::thread(&Network::breathe,this);
 	//Thread->detach();
 }
 
@@ -197,10 +196,56 @@ void Network::processTcpPackage(int fd){
 		case 1:
 			Msg msg;
 			msg = packet->recvMsg();
-			msgMgr.addMsg(&msg);
+			if(msg.cmd == breathe_cmd)
+				processBreathe(msg);
+			else
+				msgMgr.addMsg(&msg);
 			break;
 		case 0:
 			std::cout << "wait a new packet" << std::endl;	
 			break;
 	}
+}
+
+void Network::processBreathe(const Msg &msg){
+	if(msg.cmd == breathe_cmd){
+		connections[msg.fd].count = 0;
+	}
+}
+
+void Network::breathe(){
+	while(true) {
+		using namespace std::chrono;
+    	steady_clock::time_point tpBegin = steady_clock::now();
+		for(auto it = connections.begin();it!= connections.end();it++){
+			Connect connect = it->second;
+			std::cout << "breathe fd:" << connect.fd <<"count:"<<connect.count<< std::endl;
+			if(connect.count >= 6*time_out){
+				std::cout << "close fd:" << connect.fd << std::endl;
+				ctlEvent(connect.fd,false);
+			}else{
+				connections[connect.fd].count +=1;
+			}
+		}
+
+		milliseconds dur;
+        do{
+			steady_clock::time_point tpNow = steady_clock::now();
+	        dur = duration_cast<milliseconds>(tpNow - tpBegin);
+			std::this_thread::sleep_for(milliseconds(1000));
+        }while(dur.count()< 10000);
+	}
+}
+
+void Network::newConnect(int fd){
+	Msg * msg = new Msg;
+	msg->fd = fd;
+	msg->cmd = fd_newconnect;
+	memset(msg->buff,0,(size_t)2048);
+	msgMgr.addMsg(msg); 
+
+	Connect connect;
+	connect.fd = fd;
+	connect.count = 0;
+	connections[fd] = connect;
 }

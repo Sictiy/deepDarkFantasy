@@ -14,6 +14,7 @@ public:
   	static void sendDataToDb(int cmd,char *buff);
 	static int dbFd;
 	static void selectRank(int fd);
+	static void breatheToDb();
 
 private:
 	void getRank(Msg * msg);
