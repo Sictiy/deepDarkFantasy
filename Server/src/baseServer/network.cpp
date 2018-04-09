@@ -26,7 +26,7 @@ Network::~Network(){
 		Thread->join();
 	}
 	delete Thread;
-	close(Listenfd);gg
+	close(Listenfd);
 
 	PacketMap.clear();
 	std::cout << "close network!"<<std::endl;
