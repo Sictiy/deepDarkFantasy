@@ -134,7 +134,6 @@ void Network::ctlEvent(int fd, bool flag){
 
 int Network::epollLoop(){
 	using namespace std::chrono;
-    steady_clock::time_point tpBegin = steady_clock::now();
 
 	struct sockaddr_in client_addr;
 	socklen_t client_len;
@@ -143,6 +142,7 @@ int Network::epollLoop(){
 	int bufflen = 0;
 	struct epoll_event events[MAXEVENTSIZE];
 	while(true){
+    	steady_clock::time_point tpBegin = steady_clock::now();
 		nfds = epoll_wait(Epoolfd, events, MAXEVENTSIZE, TIMEWAIT);
 		for(int i = 0; i < nfds; i++){
 			std::cout <<getTime()<< "get msg event form fd:" << events[i].data.fd<< std::endl;
@@ -165,9 +165,9 @@ int Network::epollLoop(){
 			steady_clock::time_point tpNow = steady_clock::now();
 	        dur = duration_cast<milliseconds>(tpNow - tpBegin);
             std::this_thread::sleep_for(milliseconds(100));
-        }while (dur.count() * 1 < Frame * 1000);
+        }while (dur.count() * 1 < 1000);
 
-        Frame++;
+        // Frame++;
 	}
 }
 
