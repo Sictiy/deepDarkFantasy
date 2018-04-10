@@ -32,6 +32,7 @@ private:
 	/* data */
 };
 
-#define luaMgr LuaMgr::Instance()
+int luaLog(lua_State* L);
 
+#define luaMgr LuaMgr::Instance()
 #endif // __LUAMGR

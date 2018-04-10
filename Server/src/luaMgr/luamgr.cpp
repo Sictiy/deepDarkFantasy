@@ -15,9 +15,14 @@ bool LuaMgr::init(){
 	luaL_openlibs(L);
 	pLuaState = L;
 
-	int retCode = loadScript("config.lua","Config");
-	if(!retCode)
-		std::cout << "can't find 'config.lua'"<< std::endl;
+
+	/***************************/
+	lua_pushcfunction(L, luaLog);
+    lua_setglobal(L, "Log");
+
+	// int retCode = loadScript("config.lua","Config");
+	// if(!retCode)
+	// 	std::cout << "can't find 'config.lua'"<< std::endl;
 	return true;
 }
 
@@ -35,11 +40,19 @@ bool LuaMgr::loadScript(const char * script_name, const char * lua_Name){
 	lua_State* L = pLuaState;
 	int top = lua_gettop(L);
 
-	luaL_loadfile(L,script_name);
+	int loadRet = luaL_loadfile(L,script_name);
+	if(loadRet){
+		std::cout << "load failed!" << std::endl;
+		lua_settop(L,top);
+		return result;
+	}
+	std::cout << "loadScript "<<script_name << std::endl;
 	if(lua_isfunction(L,-1)){
+		std::cout << "lua_isfunction" << std::endl;
 		if(lua_Name != NULL){
 			lua_getglobal(L,lua_Name);
 			if(lua_isnil(L,-1)){
+				std::cout << "lua_name is nill" << std::endl;
 				lua_pop(L,1);
 				lua_newtable(L);
 				lua_newtable(L);
@@ -78,4 +91,17 @@ bool LuaMgr::luaCall(lua_State * L, int args, int results){
 
 bool LuaMgr::start(){
 	return loadScript("main.lua",NULL);
+}
+
+/********************************************/
+int luaLog(lua_State* L){
+	std::cout << "lua print: "<< std::endl;
+	bool retCode = false;
+	const char* log_text = lua_tostring(L,1);
+	if(log_text){
+		std::cout << log_text << std::endl;
+	}else{
+		std::cout << "read log_text failed!" << std::endl;
+	}
+	return 0;
 }
