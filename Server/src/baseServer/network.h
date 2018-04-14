@@ -23,7 +23,6 @@ private:
 private:
 	int Epoolfd;
 	int Listenfd;
-	bool Isloop;
 	std::thread* Thread;
 	int64_t Frame;
 	std::map<int,Packet*> PacketMap;

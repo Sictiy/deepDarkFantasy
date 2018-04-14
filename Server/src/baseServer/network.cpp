@@ -5,13 +5,11 @@ Network::Network():
 	Epoolfd(0),
 	Listenfd(0),
 	Thread(nullptr),
-	Frame(0),
-	Isloop(true){
+	Frame(0){
 	PacketMap.clear();
 }
 
 Network::~Network(){
-	Isloop = false;
 	if(nullptr != Thread){
 		Thread->join();
 	}
@@ -161,7 +159,7 @@ int Network::setNoblock(int fd){
 void Network::run(){
 	std::cout << "network is runing!" <<std::endl;
 	Thread = new std::thread(&Network::epollLoop, this);
-	//Thread->detach();
+	Thread->detach();
 }
 
 void Network::processTcpPackage(int fd){

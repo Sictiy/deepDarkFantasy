@@ -5,7 +5,10 @@ MsgMgr::MsgMgr(){
 }
 
 MsgMgr::~MsgMgr(){
-
+	if(nullptr != Thread){
+		Thread->join();
+	}
+	delete Thread;
 }
 
 void MsgMgr::init(){
@@ -16,6 +19,7 @@ void MsgMgr::init(){
 void MsgMgr::run(){
 	std::cout << "msgmgr is runing!"<<std::endl;	
 	std::thread* Thread = new std::thread(&MsgMgr::process,this);
+	Thread->detach();
 }
 
 void MsgMgr::process(){

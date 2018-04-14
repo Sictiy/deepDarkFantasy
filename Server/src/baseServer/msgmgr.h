@@ -28,6 +28,7 @@ private:
 
 	void run();
 	void process();
+	std::thread* Thread;
 	std::map<int, HandlerList> handler_map_;
 	MsgQueue * msgs;
 };
