@@ -13,6 +13,7 @@ public:
   	virtual void handleMsg(Msg *msg);
   	static void sendDataToDb(int cmd,char *buff);
 	static void selectRank();
+	static void breatheToDb();
 
 private:
 	void getRank(Msg * msg);

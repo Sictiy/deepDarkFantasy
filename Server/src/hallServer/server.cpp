@@ -37,6 +37,7 @@ bool Server::init(){
 		std::cout << "connectDbServer,fd:" << dbFd << std::endl;
 
 		DbHandler::selectRank();
+		new std::thread(&DbHandler::breatheToDb);
 		return true;
 	}
 

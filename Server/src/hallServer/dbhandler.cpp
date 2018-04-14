@@ -47,8 +47,26 @@ void DbHandler::selectRank(){
 
 void DbHandler::sendDataToDb(int cmd, char *buff){
 	Msg *msg;
-	msg->cmd = h2d_insert;
+	msg->cmd = cmd;
 	msg->fd = server.getDbFd();
 	memcpy(msg->buff,buff,strlen(buff));
 	DbHandler::sendMsg(msg);
+}
+
+void DbHandler::breatheToDb(){
+	while(true) {
+		using namespace std::chrono;
+    	steady_clock::time_point tpBegin = steady_clock::now();
+
+		Msg *msg;
+		msg->cmd = breathe_cmd;
+		msg->fd = server.getDbFd();
+		DbHandler::sendMsg(msg);
+		milliseconds dur;
+        do{
+			steady_clock::time_point tpNow = steady_clock::now();
+	        dur = duration_cast<milliseconds>(tpNow - tpBegin);
+			std::this_thread::sleep_for(milliseconds(1000));
+		}while(dur.count()< 10000*3);
+	}
 }
