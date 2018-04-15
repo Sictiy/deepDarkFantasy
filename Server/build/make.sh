@@ -1,29 +1,17 @@
 #!/bin/bash
-rm -rf hallbuild
-mkdir hallbuild
-cd hallbuild
-cmake ../../src/hallServer
-cd ..
+rm -rf server
+mkdir server
+rm -rf bin
+mkdir bin
 
-rm -rf dbbuild
-mkdir dbbuild
-cd dbbuild
-cmake ../../src/dbServer
-cd ..
-
-rm -rf ./bin
-mkdir ./bin
-
-cd ./dbbuild
-pwd
+cd ./server
+cmake ../../server
 make
-cp ./dbServer ../bin/
-sleep 1
-cd ../
 
-cd ./hallbuild
-pwd
-make
-cp ./hallServer ../bin/
-sleep 1
-cd ../
+cd ./dbServer
+cp ./dbServer ../../bin/
+
+cd ../hallServer
+cp ./hallServer ../../bin/
+
+cd ../../

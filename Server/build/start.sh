@@ -2,8 +2,8 @@
 cd ./bin
 
 ./dbServer
-echo "restart dbServer ..."
+echo "start dbServer ..."
 
 sleep 1
 ./hallServer
-echo "restart hallServer ..."
+echo "start hallServer ..."

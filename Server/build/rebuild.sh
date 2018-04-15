@@ -1,33 +1,23 @@
 #!/bin/sh
+./stop.sh
+echo "stop success!"
+sleep 1
+
 rm -rf ./bin
-mkdir ./bin
+mkdir bin
 
-cd ./dbbuild
-pwd
-make
-cp ./dbServer ../bin/
-sleep 1
-cd ../
+cd ./server
+make 
 
-cd ./hallbuild
-pwd
-make
-cp ./hallServer ../bin/
-sleep 1
-cd ../
+cd ./dbServer
+cp ./dbServer ../../bin/
 
-cd ./bin/
-pwd
-kill -9 `ps ax | grep ./hallServer | grep -v grep | awk '{print $1}'`
-echo "shutdown hallServer ..."
+cd ../hallServer
+cp ./hallServer ../../bin/
 
-kill -9 `ps ax | grep ./dbServer | grep -v grep | awk '{print $1}'`
-echo "shutdown dbServer ..."
+cd ../../
+echo "remake success!"
 
 sleep 1
-./dbServer
-echo "restart dbServer ..."
-
-sleep 1
-./hallServer
-echo "restart hallServer ..."
+./start.sh
+echo "restart success!"

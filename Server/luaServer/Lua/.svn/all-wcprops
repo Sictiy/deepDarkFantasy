@@ -1,0 +1,341 @@
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua
+END
+lauxlib.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lauxlib.c
+END
+ldebug.c
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/ldebug.c
+END
+lauxlib.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lauxlib.h
+END
+ldebug.h
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/ldebug.h
+END
+ltablib.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/ltablib.c
+END
+liolib.c
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/liolib.c
+END
+lstrlib.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lstrlib.c
+END
+lualib.h
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lualib.h
+END
+ldo.c
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/ldo.c
+END
+ldump.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/ldump.c
+END
+ldo.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/ldo.h
+END
+loslib.c
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/loslib.c
+END
+lundump.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lundump.c
+END
+ldblib.c
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/ldblib.c
+END
+lundump.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lundump.h
+END
+lmem.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lmem.c
+END
+ltm.c
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/ltm.c
+END
+lstate.c
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lstate.c
+END
+CMakeLists.txt
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/CMakeLists.txt
+END
+lmathlib.c
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lmathlib.c
+END
+lvm.c
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lvm.c
+END
+lmem.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lmem.h
+END
+ltm.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/ltm.h
+END
+lstate.h
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lstate.h
+END
+lvm.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lvm.h
+END
+ltable.c
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/ltable.c
+END
+Luna.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/Luna.h
+END
+llex.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/llex.c
+END
+lgc.c
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lgc.c
+END
+loadlib.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/loadlib.c
+END
+lfunc.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lfunc.c
+END
+lopcodes.c
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lopcodes.c
+END
+lparser.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lparser.c
+END
+ltable.h
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/ltable.h
+END
+llex.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/llex.h
+END
+lgc.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lgc.h
+END
+lfunc.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lfunc.h
+END
+lopcodes.h
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lopcodes.h
+END
+lbaselib.c
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lbaselib.c
+END
+lparser.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lparser.h
+END
+lzio.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lzio.c
+END
+linit.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/linit.c
+END
+lobject.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lobject.c
+END
+llimits.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/llimits.h
+END
+lstring.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lstring.c
+END
+lzio.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lzio.h
+END
+version.txt
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/version.txt
+END
+lapi.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lapi.c
+END
+lcode.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lcode.c
+END
+lua.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lua.h
+END
+lobject.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lobject.h
+END
+lstring.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lstring.h
+END
+lapi.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lapi.h
+END
+lcode.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/lcode.h
+END
+luaconf.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/luaconf.h
+END
+print.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/DP/!svn/ver/2559/Tech/Server/branches/sictiy/ServerBase/Lua/print.c
+END
