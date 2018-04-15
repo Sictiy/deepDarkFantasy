@@ -1,5 +1,7 @@
 module(..., package.seeall)
 
+local server = nil
+
 function startServer()
 	init()
 	start()

@@ -28,6 +28,7 @@ bool Server::init(){
 		setDaemon();
 
 		msgMgr.init();
+		msgMgr.run();
 		dbMgr.init();
 		registerHandler();
 		network.run();

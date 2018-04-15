@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 PROJECT(Deepdf)
-SET(BIN App)
+SET(BIN app)
 FILE(GLOB HEAD *.h ../baseServer/*.h)
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-lprotobuf")
 ADD_DEFINITIONS(-ldl)

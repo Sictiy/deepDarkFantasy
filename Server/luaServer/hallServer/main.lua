@@ -14,14 +14,5 @@ function print(...)
 	Log("[LUA PRINT]:" .. str);
 end
 
-print("loadScript main.lua success!")
 local server = require "server"
 server.startServer()
-
--- function test()
--- 	print("test success!")
--- 	return "test return "
--- 	-- body
--- end
-
--- string = "test string"

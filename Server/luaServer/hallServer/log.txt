@@ -1,0 +1,5 @@
+load failed!
+can't find 'config.lua'
+msgmgr is runing!
+load failed!
+network is runing!
