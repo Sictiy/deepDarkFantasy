@@ -30,6 +30,11 @@ Network::~Network(){
 	std::cout << "close network!"<<std::endl;
 }
 
+bool Network::init(){
+	Epoolfd = epoll_create(MAXEVENTSIZE);
+	return true;	
+}
+
 bool Network::createServer(const char* ip, int port){
 	unsigned long m_addr = INADDR_ANY;
 
@@ -74,8 +79,7 @@ bool Network::createServer(const char* ip, int port){
 		return false;
 	}
 
-	Epoolfd = epoll_create(MAXEVENTSIZE);
-	ctlEvent(Listenfd, true);
+	ctlEvent(Listenfd, true, Server);
 	std::cout << "CreateListenPort:"<<ip<<":"<<port<<" Success!"<<std::endl;
 
 	return true;
@@ -100,11 +104,11 @@ int Network::connectServer(const char* ip, int port){
         printf("connect failed!\n");
         return -1;
     }
-    ctlEvent(socketfd,true);
+    ctlEvent(socketfd,true,Server);
     return socketfd;
 }
 
-void Network::ctlEvent(int fd, bool flag){
+void Network::ctlEvent(int fd, bool flag, PacketType type){
 	struct epoll_event ev;
 	ev.data.fd = fd;
 	ev.events = flag ? EPOLLIN : 0;
@@ -113,6 +117,7 @@ void Network::ctlEvent(int fd, bool flag){
 		setNoblock(fd);
 
 		Packet* packet = new Packet(fd);
+		packet->setType(type);
 		PacketMap[fd] = packet;
 		
 		if(fd != Listenfd){
@@ -121,11 +126,8 @@ void Network::ctlEvent(int fd, bool flag){
 	}
 	else{
 		close(fd);
-		//delete ClientMap[fd];
+		luaMgr.disConnect(PacketMap[fd]);
 		PacketMap.erase(fd);
-
-		connections.erase(fd);
-
 		std::cout <<"fd:"<< fd << " exit from loop." << std::endl;
 	}
 }
@@ -146,7 +148,7 @@ int Network::epollLoop(){
 			std::cout <<getTime()<< "get msg event form fd:" << events[i].data.fd<< std::endl;
 			if(events[i].data.fd == Listenfd){
 				fd = accept(Listenfd, (struct sockaddr*)&client_addr, &client_len);
-				ctlEvent(fd, true);
+				ctlEvent(fd, true, Client);
 				char ipAddress[INET_ADDRSTRLEN];
 				std::cout << "accept connection from :"<<inet_ntop(AF_INET, &client_addr.sin_addr, ipAddress, sizeof(ipAddress))<<":"<<ntohs(client_addr.sin_port)<< std::endl;
 
@@ -190,25 +192,27 @@ void Network::processTcpPackage(int fd){
 	Packet *packet = PacketMap[fd];
 	switch(packet->addPacket(fd)){
 		case -1:
-			ctlEvent(fd,false);
+			ctlEvent(fd,false,Client);
 			break;
 		case 1:
-			Msg msg ;
-			msg = packet->recvMsg();
-			if(msg.cmd == breathe_cmd)
-				processBreathe(msg);
-			else
-				msgMgr.addMsg(&msg);
-			break;
+			processBreathe(packet);
+			luaMgr.recvData(packet);
+			// Msg msg ;
+			// msg = packet->recvMsg();
+			// if(msg.cmd == breathe_cmd)
+			// 	processBreathe(msg);
+			// else
+			// 	msgMgr.addMsg(&msg);
+			// break;
 		case 0:
 			std::cout << "wait a new packet" << std::endl;	
 			break;
 	}
 }
 
-void Network::processBreathe(const Msg &msg){
-	if(msg.cmd == breathe_cmd){
-		connections[msg.fd].count = 0;
+void Network::processBreathe(Packet * packet){
+	if(packet->getCmd() == breathe_cmd){
+		packet->breatheGet();
 	}
 }
 
@@ -216,14 +220,14 @@ void Network::breathe(){
 	while(true) {
 		using namespace std::chrono;
     	steady_clock::time_point tpBegin = steady_clock::now();
-		for(auto it = connections.begin();it!= connections.end();it++){
-			Connect connect = it->second;
-			std::cout << "breathe fd:" << connect.fd <<"count:"<<connect.count<< std::endl;
-			if(connect.count >= 6*time_out){
-				std::cout << "close fd:" << connect.fd << std::endl;
-				ctlEvent(connect.fd,false);
+		for(auto it = PacketMap.begin();it!=PacketMap.end();it++){
+			Packet* packet = it->second;
+			// std::cout << "breathe fd:" << connect.fd <<"count:"<<connect.count<< std::endl;
+			if(packet->needClose()){
+				std::cout << "close fd:" << packet->getFd()<< std::endl;
+				ctlEvent(packet->getFd(),false,Client);
 			}else{
-				connections[connect.fd].count +=1;
+				packet->breathe();
 			}
 		}
 
@@ -237,14 +241,18 @@ void Network::breathe(){
 }
 
 void Network::newConnect(int fd){
-	Msg * msg = new Msg;
-	msg->fd = fd;
-	msg->cmd = fd_newconnect;
-	memset(msg->buff,0,(size_t)2048);
-	msgMgr.addMsg(msg); 
+	// Msg * msg = new Msg;
+	// msg->fd = fd;
+	// msg->cmd = fd_newconnect;
+	// memset(msg->buff,0,(size_t)2048);
+	// msgMgr.addMsg(msg); 
+	luaMgr.newConnect(PacketMap[fd]);
+}
 
-	Connect connect;
-	connect.fd = fd;
-	connect.count = 0;
-	connections[fd] = connect;
+Packet* Network::getPacket(int fd){
+	return PacketMap[fd];
+}
+
+Packet* Network::getListen(){
+	return PacketMap[Listenfd];
 }

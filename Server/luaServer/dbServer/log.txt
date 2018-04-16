@@ -4,6 +4,9 @@ lua_name is nill
 loadScript main.lua
 lua_isfunction
 [LUA PRINT]:init
+CreateListenPort:0.0.0.0:5051 Success!
+createServer success : [0.0.0.0:5051] 
+pushluaFunction success: 
+pushPacket success: 1
 [LUA PRINT]:start
-[LUA PRINT]:start connect to db
 network is runing!

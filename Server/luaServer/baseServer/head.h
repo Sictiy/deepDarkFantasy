@@ -52,21 +52,4 @@
 #define h2d_insert 5
 #define d2h_insert 6
 
-
-struct Msg{
-	int fd;
-	//int type;
-	int cmd;
-	char buff[MAXLEN];
-};
-
-struct RoleData{
-	std::string name;
-	uint score;
-};
- 
-struct Connect{
-	int fd;
-	int count;
-};
 #endif

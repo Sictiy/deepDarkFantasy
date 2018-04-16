@@ -2,7 +2,6 @@ module(..., package.seeall)
 
 local server = nil
 local connections = {}
-local dbs = {}
 local connect_count = 0
 
 function startServer()
@@ -12,14 +11,13 @@ end
 
 function init()
 	print("init")
-	-- ConnectServer(Config.DbHost,Config.Dbport);
 	-- body
 end
 
 function start()
 	print("start")
-	-- createServer(Config.ServerHost,Config.ServerPort);
-	connectToDbServer(Config.DbHost,Config.DbPort);
+	createServer(Config.ServerHost,Config.ServerPort);
+	-- ConnectServer(Config.DbHost,Config.DbPort);
 	-- body
 end
 
@@ -32,20 +30,6 @@ function update()
 end
 
 function shutdown()
-	-- body
-end
-
-function connectToDbServer(host,port)
-	print("start connect to db")
-	local db = ConnectServer(host,port)
-	if db then 
-		db.recvData = recvData
-		db.disConnect = disConnect
-		print("connect to db success")
-		table.insert(dbs,db)
-	else
-		print("connect to db failed!")
-	end
 	-- body
 end
 

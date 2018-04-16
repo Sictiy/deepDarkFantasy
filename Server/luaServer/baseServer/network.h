@@ -3,7 +3,8 @@
 
 #include "head.h"
 #include "packet.h"
-#include "msgmgr.h"
+#include "luamgr.h"
+// #include "msgmgr.h"
 #include "time.h"
 
 class Network{
@@ -16,15 +17,18 @@ public:
 	virtual ~Network();
 
 	void run();
+	bool init();
 	bool createServer(const char* ip, int port);
 	int connectServer(const char* ip, int port);
+	Packet* getPacket(int fd);
+	Packet* getListen();
 
 private:
 	int epollLoop();
 	int setNoblock(int fd);
-	void ctlEvent(int fd, bool flag);
+	void ctlEvent(int fd, bool flag, PacketType type);
 	void processTcpPackage(int fd);
-	void processBreathe(const Msg &);
+	void processBreathe(Packet * packet);
 	void breathe();
 	void newConnect(int fd);
 
@@ -34,7 +38,6 @@ private:
 	std::thread* Thread;
 	int64_t Frame;
 	std::map<int,Packet*> PacketMap;
-	std::map<int,Connect> connections;
 };
 
 #define network Network::Instance()

@@ -3,6 +3,15 @@
 
 #include "head.h"
 
+// IMPL_LUA_CLASS_BEGIN(Packet)
+// 	EXPORT_LUA_FUNCTION(sendData)
+// IMPL_LUA_CLASS_END()
+
+enum PacketType {
+	Server,
+	Client
+};
+
 class Packet
 {
 public:
@@ -13,20 +22,30 @@ public:
 	short getLength();
 	char* getBuff();
 	int getFd();
-	int getCmd();
-	//short getType();
-	static void sendMsg(int fd,const Msg *msg);
-	Msg recvMsg();
+	short getCmd();
+	void setType(PacketType);
+	bool needClose();
+	void breathe();
+	void breatheGet();
+	void setRef(int nRef);
+	int getRef();
+	// static void sendMsg(int fd,const Msg *msg);
+	void sendData(short length, short cmd,const char * data);
+	// Msg recvMsg();
 
 private:
 	int fd;
 	short cmd;
-	//short type;
+	PacketType type;
 	char buff[MAXLEN];
-	char cache[MAXLEN];
 
+	char cache[MAXLEN];
 	short length;
 	short offset;
+
+	short breathe_count;
+
+	int nRef;
 	/* data */
 };
 

@@ -2,8 +2,7 @@
 // #include "../baseServer/packet.h"
 // #include "../baseServer/msgmgr.h"
 // #include "../baseServer/network.h"
-#include "packet.h"
-#include "msgmgr.h"
+// #include "msgmgr.h"
 #include "network.h"
 
 LuaMgr::LuaMgr(){
@@ -26,8 +25,11 @@ bool LuaMgr::init(){
 	lua_pushcfunction(L, luaLog);
     lua_setglobal(L, "Log");
 
-    lua_newtable(L);
-    pRef = lua_ref(L,-1);
+    lua_pushcfunction(L,luaCreateServer);
+    lua_setglobal(L, "CreateServer");
+
+    lua_pushcfunction(L,luaConnectServer);
+    lua_getglobal(L,"ConnectServer");
 
 	bool retCode = loadScript("config.lua","Config");
 	if(!retCode)
@@ -103,48 +105,52 @@ bool LuaMgr::start(){
 	return loadScript("main.lua");
 }
 
-void LuaMgr::recvData(Msg* msg){
+/*********************************************function to network*/
+void LuaMgr::recvData(Packet * packet){
 	lua_State* L = pLuaState;
 	int top = lua_gettop(L);
-	int nRef =  pRef;
+	int nRef =  packet->getRef();
 	lua_getref(L,nRef);
 	lua_getfield(L,-1,"recvData");
 	if(lua_isfunction(L,-1)){
-		lua_pushnumber(L,msg->fd);
-		lua_pushnumber(L,msg->cmd);
-		lua_pushlstring(L,msg->buff,strlen(msg->buff));
+		// lua_pushnumber(L,packet->getFd());
+		lua_pushnumber(L,packet->getCmd());
+		lua_pushlstring(L,packet->getBuff(),strlen(packet->getBuff()));
+		pushPacket(L,packet);
 		luaCall(L,3,0);
 	}
 	lua_settop(L,top);
 }
 
-void LuaMgr::disConnect(int fd){
+void LuaMgr::disConnect(Packet * packet){
 	lua_State* L = pLuaState;
 	int top = lua_gettop(L);
-	int nRef = pRef;
+	int nRef = packet->getRef();
 	lua_getref(L,nRef);
 	lua_getfield(L,-1,"disConnect");
 	if(lua_isfunction(L,-1)){
-		lua_pushnumber(L,fd);
+		// lua_pushnumber(L,packet->getFd());
+		pushPacket(L,packet);
 		luaCall(L,1,0);
 	}
 	lua_settop(L,top);
 }
 
-// void LuaMgr::test(){
-// 	std::cout << "start test "<< std::endl;
-// 	lua_State* L = pLuaState;
-// 	int top = lua_gettop(L);
-// 	lua_getglobal(L,"test");
-// 	if(luaCall(L,0,1)){
-// 		std::string string = lua_tostring(L,-1);
-// 		std::cout << "luaCall success! " <<string<< std::endl;
-// 	}
-// 	lua_settop(L,top);
-// 	std::cout <<"string:"<< getString(L,"string") << std::endl;
-// }
+void LuaMgr::newConnect(Packet* packet){
+	lua_State* L = pLuaState;
+	int top = lua_gettop(L);
+	int nRef = packet->getRef();
+	lua_getref(L,nRef);
+	lua_getfield(L,-1,"newConnect");
+	if(lua_isfunction(L,-1)){
+		// lua_pushnumber(L,packet->getFd());
+		pushPacket(L,packet);
+		luaCall(L,1,0);
+	}
+	lua_settop(L,top); 
+}
 
-/********************************************/
+/*******************************************function to lua*/
 int luaLog(lua_State* L){
 	bool retCode = false;
 	const char* log_text = lua_tostring(L,1);
@@ -157,6 +163,7 @@ int luaLog(lua_State* L){
 }
 
 int luaConnectServer(lua_State* L){
+	std::cout << "start connect server"<< std::endl;
 	int top = lua_gettop(L);
 	const char* sIp = lua_tostring(L,1);
 	int nPort = (int)lua_tointeger(L,2);
@@ -164,9 +171,9 @@ int luaConnectServer(lua_State* L){
 	fd = network.connectServer(sIp,nPort);
 	if(fd > 0){
 		std::cout << "connectServer success : [" << sIp<<":"<<nPort<<"] socket: "<< fd<<std::endl;
-		lua_pushnumber(L,fd);
 	}
-	lua_pushnumber(L,0);
+	Packet* packet = network.getPacket(fd);
+	pushPacket(L,packet);
 	return 1;
 }
 
@@ -176,26 +183,22 @@ int luaCreateServer(lua_State* L){
 	int nPort = lua_tointeger(L,2);
 	if(network.createServer(sIp,nPort)){
 		std::cout << "createServer success : [" << sIp<<":"<<nPort<<"] "<<std::endl;
-		lua_pushboolean(L,1);
 	}
-	lua_pushboolean(L,0);
+	Packet* packet = network.getListen();
+	pushPacket(L,packet);
 	return 1;
 }
 
 int luaSendData(lua_State* L){
 	int top = lua_gettop(L);
-	int fd = lua_tointeger(L,1);
-	int cmd = lua_tointeger(L,2);
-	const char* data = lua_tostring(L,3);
-	Msg* msg;
-	msg->fd = fd;
-	msg->cmd = cmd;
-	// msg->buff = const_cast<char*>(data);
-	memcpy(msg->buff,data,strlen(data));
-	Packet::sendMsg(fd,msg);
+	Packet* packet = (Packet*)lua_touserdata(L,lua_upvalueindex(1));
+	short cmd = (short)lua_tonumber(L,1);
+	size_t length = 0;
+	const char* data =lua_tolstring(L,2,&length);
+	packet->sendData(length,cmd,data);
 	return 0;
 }
-/********************************************/
+/*******************************************function to get data from lua*/
 
 std::string getString(lua_State* L, const char * name){
 	int top	= lua_gettop(L);
@@ -211,4 +214,40 @@ int getInt(lua_State* L, const char* name){
 	int result = lua_tonumber(L,-1);
 	lua_settop(L,top);
 	return result;	
+}
+
+void pushLuaFunction(const char * name ,lua_State* L, Packet* packet, lua_CFunction func){
+	lua_pushstring(L,name);
+	lua_pushlightuserdata(L,packet);
+	lua_pushcclosure(L,func,1);
+	lua_rawset(L,-3);
+	std::cout << "pushluaFunction success: "  << std::endl;
+}
+
+void pushPacket(lua_State* L, Packet* packet){
+	int nRef = 0;
+	if(!packet){
+		lua_pushnil(L);
+		std::cout << "pushPacket failed: " <<nRef << std::endl;
+		return;
+	}
+	nRef = (int)(intptr_t)packet->getRef();
+	if(nRef != LUA_NOREF){
+		lua_getref(L,nRef);
+		std::cout << "pushPacket getRef: " <<nRef << std::endl;
+		return;
+	}
+
+	lua_newtable(L);
+
+	lua_pushstring(L,"__packet");
+	lua_pushlightuserdata(L,packet);
+	lua_rawset(L,-3);
+
+	pushLuaFunction("SendData",L,packet,luaSendData);
+
+	lua_pushvalue(L,-1);
+	nRef = lua_ref(L,true);
+	packet->setRef(nRef);
+	std::cout << "pushPacket success: " <<nRef << std::endl;
 }

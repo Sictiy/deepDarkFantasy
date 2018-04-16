@@ -1,7 +1,7 @@
 #include "server.h"
 #include "../baseServer/luamgr.h"
 #include "../baseServer/network.h"
-#include "../baseServer/msgmgr.h"
+// #include "../baseServer/msgmgr.h"
 
 /*******************************************/
 bool loop = true;
@@ -22,17 +22,17 @@ Server::~Server(){
 }
 
 bool Server::init(){
-	setDaemon();
+	// setDaemon();
 
-	msgMgr.init();
+	// msgMgr.init();
 	luaMgr.init();
-
+	network.init();
 	return true;
 }
 
 void Server::run(){
 	using namespace std::chrono;
-	msgMgr.run();
+	// msgMgr.run();
 	luaMgr.start();
 	network.run();
 	while(loop){
