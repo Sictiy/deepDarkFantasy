@@ -4,5 +4,5 @@ cmake ../
 make
 
 rm -f ../hallServer/App
-cp ./app/App ../hallServer
-cp ./app/App ../dbServer
+cp ./baseServer/App ../hallServer
+cp ./baseServer/App ../dbServer

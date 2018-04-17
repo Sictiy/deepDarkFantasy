@@ -30,7 +30,7 @@ LuaMgr::~LuaMgr(){
 
 void LuaMgr::clear(){
 	if(pLuaState){
-		for(auto nRef: stateFuncs){
+		for(int nRef: stateFuncs){
 			if(nRef != LUA_NOREF){
 				lua_unref(pLuaState,nRef);
 			}
@@ -64,7 +64,7 @@ bool LuaMgr::init(){
     lua_setglobal(L,"SetStateFunc");
 
     lua_pushlightuserdata(L, this);
-    lua_pushcclosure(L, LuaSetErrorFunc, 1);
+    lua_pushcclosure(L, luaSetErrorFunc, 1);
     lua_setglobal(L, "SetErrorFunc");
 
 	bool retCode = loadScript("config.lua","Config");
@@ -188,7 +188,7 @@ bool LuaMgr::luaCall(lua_State * L, int args, int results){
 	if(retCode != 0){
 		const char* errorInfo = lua_tostring(L,-1);
 		if(errorInfo&&errorInfo[0])
-			std::count << errorInfo << std::endl;
+			std::cout << errorInfo << std::endl;
 		return false;
 	}
 	return true;
@@ -213,7 +213,7 @@ void LuaMgr::setErrorFunc(lua_State* L,int index){
 		errorFunc = LUA_NOREF;
 	}
 	if(lua_isfunction(L,index)){
-		lua_pushvalue(L,index)
+		lua_pushvalue(L,index);
 		errorFunc = lua_ref(L,true);
 	}
 }
