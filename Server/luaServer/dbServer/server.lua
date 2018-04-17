@@ -5,6 +5,7 @@ local connections = {}
 local connect_count = 0
 
 function startServer()
+	SetStateFunc{load = load, update = update}
 	init()
 	start()
 end
@@ -16,20 +17,23 @@ end
 
 function start()
 	print("start")
-	createServer(Config.ServerHost,Config.ServerPort);
 	-- ConnectServer(Config.DbHost,Config.DbPort);
 	-- body
 end
 
 function load()
+	createServer(Config.ServerHost,Config.ServerPort);
+	print("load success")
 	-- body
 end
 
-function update()
+function update(frame)
+	print("update",frame)
 	-- body
 end
 
 function shutdown()
+	print("shutdown")
 	-- body
 end
 

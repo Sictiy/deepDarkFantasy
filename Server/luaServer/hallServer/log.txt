@@ -1,9 +1,0 @@
-loadScript config.lua
-lua_isfunction
-lua_name is nill
-loadScript main.lua
-lua_isfunction
-[LUA PRINT]:init
-[LUA PRINT]:start
-[LUA PRINT]:start connect to db
-network is runing!

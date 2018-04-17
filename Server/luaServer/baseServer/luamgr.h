@@ -4,10 +4,17 @@
 #include "head.h"
 #include "packet.h"
 #include "iostream"
+
 extern "C"{
 	#include <lua.h>
 	#include <lauxlib.h>
 	#include <lualib.h>
+};
+
+enum lua_fState{
+	lua_load,
+	lua_update,
+	lua_shutdown
 };
 
 class LuaMgr
@@ -24,24 +31,30 @@ public:
 	void clear();
 
 	bool start();
+	void process(int64_t frame);
+	bool isShutDown();
 	bool loadScript(const char * script_name, const char * lua_Name = NULL);
 	bool luaCall(lua_State* L,int args,int results);
+	void setStateFunc(lua_State* L, lua_fState state, int index);
 
 	void disConnect(Packet* packet);
 	void recvData(Packet* packet);
 	void newConnect(Packet* packet);
 
-	// void test();
+	int getInt(const char *);
+	std::string getString(const char *);
 
 private:
 	lua_State* pLuaState;
-	// int pRef;
-	/* data */
+	lua_fState pState;
+	int StateFuncs[];
+	bool pShutDown;
 };
 void pushLuaFunction(const char * name ,lua_State* L, Packet* packet, lua_CFunction func);
 void pushPacket(lua_State* L, Packet* packet);
 
 int luaLog(lua_State* L);
+int luaSetStateFunc(lua_State* L);
 int luaSendData(lua_State* L);
 int luaCreateServer(lua_State* L);
 int luaConnectServer(lua_State* L);

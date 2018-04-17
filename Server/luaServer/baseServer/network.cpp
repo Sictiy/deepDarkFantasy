@@ -183,7 +183,7 @@ void Network::run(){
 	Thread = new std::thread(&Network::epollLoop, this);
 	//Thread->detach();
 
-	new std::thread(&Network::breathe,this);
+	// new std::thread(&Network::breathe,this);
 	//Thread->detach();
 }
 

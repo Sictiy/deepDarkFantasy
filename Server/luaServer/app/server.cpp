@@ -14,7 +14,7 @@ void sig_handler( int sig )
 }
 /*******************************************/
 Server::Server(){
-
+	frame = 0;
 }
 
 Server::~Server(){
@@ -24,7 +24,6 @@ Server::~Server(){
 bool Server::init(){
 	// setDaemon();
 
-	// msgMgr.init();
 	luaMgr.init();
 	network.init();
 	return true;
@@ -32,12 +31,28 @@ bool Server::init(){
 
 void Server::run(){
 	using namespace std::chrono;
-	// msgMgr.run();
+    steady_clock::time_point tpBegin = steady_clock::now();
+
 	luaMgr.start();
 	network.run();
-	while(loop){
-		std::this_thread::sleep_for(milliseconds(2000));
+	int fps = luaMgr.getInt("FPS");
+	std::cout << "fps: "<< fps << std::endl;
+	while(true){
+        steady_clock::time_point tpNow = steady_clock::now();
+        milliseconds dur = duration_cast<milliseconds>(tpNow - tpBegin);
+		if(dur.count()* fps < frame * 1000){
+			std::this_thread::sleep_for(milliseconds(8));
+			continue;
+		}        
+		frame++;
+		network.breathe();
+		if(luaMgr.isShutDown)
+			break;
 	}
+}
+
+bool Server::isQuit(){
+	return loop;
 }
 
 void Server::registerHandler(){

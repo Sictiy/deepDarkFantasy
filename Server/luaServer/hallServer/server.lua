@@ -6,37 +6,40 @@ local dbs = {}
 local connect_count = 0
 
 function startServer()
+	SetStateFunc{load = load, update = update}
 	init()
 	start()
 end
 
 function init()
 	print("init")
-	-- ConnectServer(Config.DbHost,Config.Dbport);
 	-- body
 end
 
 function start()
 	print("start")
-	-- createServer(Config.ServerHost,Config.ServerPort);
-	connectToDbServer(Config.DbHost,Config.DbPort);
 	-- body
 end
 
 function load()
+	createServer(Config.ServerHost,Config.ServerPort);
+	connectToDbServer(Config.DbHost,Config.DbPort);
+	print("load success")
 	-- body
 end
 
-function update()
+function update(frame)
+	print("update",frame)
 	-- body
 end
 
 function shutdown()
+	print("shutdown")
 	-- body
 end
 
 function connectToDbServer(host,port)
-	print("start connect to db")
+	print("start connect to db",host,port)
 	local db = ConnectServer(host,port)
 	if db then 
 		db.recvData = recvData

@@ -18,6 +18,7 @@ private:
 	void registerHandler();
 	void clearHandler();
 
+	int64_t frame;
 	//std::deque<Cmd> cmds;  //db deque
 	/* data */
 };
