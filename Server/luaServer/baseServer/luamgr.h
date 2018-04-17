@@ -4,6 +4,7 @@
 #include "head.h"
 #include "packet.h"
 #include "iostream"
+#include "server.h"
 
 extern "C"{
 	#include <lua.h>
@@ -12,9 +13,9 @@ extern "C"{
 };
 
 enum lua_fState{
-	lua_load,
-	lua_update,
-	lua_shutdown
+	lua_p_load,
+	lua_p_update,
+	lua_p_shutdown
 };
 
 class LuaMgr
@@ -22,10 +23,7 @@ class LuaMgr
 public:
 	LuaMgr();
 	virtual ~LuaMgr();
-	static LuaMgr &Instance(){
-		static LuaMgr luaMgr;
-		return luaMgr;
-	};
+	static LuaMgr* Instance();
 
 	bool init();
 	void clear();
@@ -47,8 +45,8 @@ public:
 private:
 	lua_State* pLuaState;
 	lua_fState pState;
-	int StateFuncs[];
 	bool pShutDown;
+	int stateFuncs[];
 };
 void pushLuaFunction(const char * name ,lua_State* L, Packet* packet, lua_CFunction func);
 void pushPacket(lua_State* L, Packet* packet);
@@ -62,5 +60,5 @@ int luaConnectServer(lua_State* L);
 std::string getString(lua_State* L,const char* name);
 int getInt(lua_State* L, const char* name);
 
-#define luaMgr LuaMgr::Instance()
+// #define luaMgr LuaMgr::Instance()
 #endif // __LUAMGR

@@ -6,10 +6,15 @@
 // IMPL_LUA_CLASS_BEGIN(Packet)
 // 	EXPORT_LUA_FUNCTION(sendData)
 // IMPL_LUA_CLASS_END()
+extern "C"{
+	#include <lua.h>
+	#include <lauxlib.h>
+	#include <lualib.h>
+};
 
 enum PacketType {
-	Server,
-	Client
+	_Server,
+	_Client
 };
 
 class Packet
@@ -17,6 +22,7 @@ class Packet
 public:
 	Packet(int);
 	virtual ~Packet();
+	// DECLARE_LUA_CLASS(Packet);
 
 	int addPacket(int fd);
 	short getLength();
@@ -24,7 +30,7 @@ public:
 	int getFd();
 	short getCmd();
 	void setType(PacketType);
-	bool needClose();
+	bool needClose(int fps);
 	void breathe();
 	void breatheGet();
 	void setRef(int nRef);

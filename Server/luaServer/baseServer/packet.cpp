@@ -1,4 +1,6 @@
 #include "packet.h"
+// IMPL_LUA_CLASS_BEGIN(CPlayer)
+// IMPL_LUA_CLASS_END()
 
 Packet::Packet(int _fd){
 	fd = _fd;
@@ -7,7 +9,7 @@ Packet::Packet(int _fd){
 	length = MAXLEN;
 	bzero(buff,strlen(buff));
 	bzero(cache,strlen(buff));
-	type = Server;
+	type = _Server;
 	breathe_count = 0;
 	nRef = -2;
 	//type = 0;
@@ -111,8 +113,8 @@ short Packet::getCmd(){
 	return cmd;
 }
 
-bool Packet::needClose(){
-	return breathe_count > time_out;
+bool Packet::needClose(int fps){
+	return breathe_count > time_out*60*fps;
 }
 
 void Packet::breatheGet(){
@@ -120,7 +122,7 @@ void Packet::breatheGet(){
 }
 
 void Packet::breathe(){
-	if(type == Client)
+	if(type == _Client)
 		breathe_count += 1;
 }
 

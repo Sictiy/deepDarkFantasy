@@ -9,6 +9,7 @@ std::string getTime(){
     return tmp;
 }
 
+Network* network = NULL;
 /*****************************************************************************************/
 
 Network::Network():
@@ -17,6 +18,13 @@ Network::Network():
 	Thread(nullptr),
 	Frame(0){
 	PacketMap.clear();
+}
+
+Network* Network::Instance(){
+	if(network == NULL){
+		network = new Network();
+	}
+	return network;
 }
 
 Network::~Network(){
@@ -79,7 +87,7 @@ bool Network::createServer(const char* ip, int port){
 		return false;
 	}
 
-	ctlEvent(Listenfd, true, Server);
+	ctlEvent(Listenfd, true, _Server);
 	std::cout << "CreateListenPort:"<<ip<<":"<<port<<" Success!"<<std::endl;
 
 	return true;
@@ -104,7 +112,7 @@ int Network::connectServer(const char* ip, int port){
         printf("connect failed!\n");
         return -1;
     }
-    ctlEvent(socketfd,true,Server);
+    ctlEvent(socketfd,true,_Server);
     return socketfd;
 }
 
@@ -126,7 +134,8 @@ void Network::ctlEvent(int fd, bool flag, PacketType type){
 	}
 	else{
 		close(fd);
-		luaMgr.disConnect(PacketMap[fd]);
+		LuaMgr* luaMgr = LuaMgr::Instance();
+		luaMgr->disConnect(PacketMap[fd]);
 		PacketMap.erase(fd);
 		std::cout <<"fd:"<< fd << " exit from loop." << std::endl;
 	}
@@ -148,7 +157,7 @@ int Network::epollLoop(){
 			std::cout <<getTime()<< "get msg event form fd:" << events[i].data.fd<< std::endl;
 			if(events[i].data.fd == Listenfd){
 				fd = accept(Listenfd, (struct sockaddr*)&client_addr, &client_len);
-				ctlEvent(fd, true, Client);
+				ctlEvent(fd, true, _Client);
 				char ipAddress[INET_ADDRSTRLEN];
 				std::cout << "accept connection from :"<<inet_ntop(AF_INET, &client_addr.sin_addr, ipAddress, sizeof(ipAddress))<<":"<<ntohs(client_addr.sin_port)<< std::endl;
 
@@ -190,13 +199,15 @@ void Network::run(){
 void Network::processTcpPackage(int fd){
 	std::cout << "get data from:" << fd << std::endl;
 	Packet *packet = PacketMap[fd];
+	LuaMgr* luaMgr = LuaMgr::Instance();
 	switch(packet->addPacket(fd)){
 		case -1:
-			ctlEvent(fd,false,Client);
+			ctlEvent(fd,false,_Client);
 			break;
 		case 1:
 			processBreathe(packet);
-			luaMgr.recvData(packet);
+
+			luaMgr->recvData(packet);
 			// Msg msg ;
 			// msg = packet->recvMsg();
 			// if(msg.cmd == breathe_cmd)
@@ -216,28 +227,28 @@ void Network::processBreathe(Packet * packet){
 	}
 }
 
-void Network::breathe(){
-	while(true) {
-		using namespace std::chrono;
-    	steady_clock::time_point tpBegin = steady_clock::now();
+void Network::breathe(int fps){
+	// while(true) {
+		// using namespace std::chrono;
+  //   	steady_clock::time_point tpBegin = steady_clock::now();
 		for(auto it = PacketMap.begin();it!=PacketMap.end();it++){
 			Packet* packet = it->second;
 			// std::cout << "breathe fd:" << connect.fd <<"count:"<<connect.count<< std::endl;
-			if(packet->needClose()){
+			if(packet->needClose(fps)){
 				std::cout << "close fd:" << packet->getFd()<< std::endl;
-				ctlEvent(packet->getFd(),false,Client);
+				ctlEvent(packet->getFd(),false,_Client);
 			}else{
 				packet->breathe();
 			}
 		}
 
-		milliseconds dur;
-        do{
-			steady_clock::time_point tpNow = steady_clock::now();
-	        dur = duration_cast<milliseconds>(tpNow - tpBegin);
-			std::this_thread::sleep_for(milliseconds(1000));
-        }while(dur.count()< 10000);
-	}
+		// milliseconds dur;
+  //       do{
+		// 	steady_clock::time_point tpNow = steady_clock::now();
+	 //        dur = duration_cast<milliseconds>(tpNow - tpBegin);
+		// 	std::this_thread::sleep_for(milliseconds(1000));
+  //       }while(dur.count()< 10000);
+	// }
 }
 
 void Network::newConnect(int fd){
@@ -246,7 +257,8 @@ void Network::newConnect(int fd){
 	// msg->cmd = fd_newconnect;
 	// memset(msg->buff,0,(size_t)2048);
 	// msgMgr.addMsg(msg); 
-	luaMgr.newConnect(PacketMap[fd]);
+	LuaMgr* luaMgr = LuaMgr::Instance();
+	luaMgr->newConnect(PacketMap[fd]);
 }
 
 Packet* Network::getPacket(int fd){

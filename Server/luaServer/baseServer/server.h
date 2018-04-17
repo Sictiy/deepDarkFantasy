@@ -1,7 +1,8 @@
-#ifndef __SERVER__
-#define __SERVER__
+// #ifndef __SERVER__
+// #define __SERVER__
+#pragma once
 
-#include "../baseServer/head.h"
+#include "head.h"
 
 class Server{
 public:
@@ -10,6 +11,9 @@ public:
 
 	bool init();
 	void run();
+
+	static Server* Instance();
+	bool isQuit();
 	//bool createServer(const char* ip, int port);
 
 private:
@@ -24,4 +28,4 @@ private:
 };
 
 
-#endif
+// #endif

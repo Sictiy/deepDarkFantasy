@@ -10,10 +10,11 @@
 class Network{
 public:
 	Network();
-	static Network &Instance(){
-		static Network inst__;
-		return inst__;
-	}
+	static Network* Instance();
+	// static Network &Instance(){
+	// 	static Network inst__;
+	// 	return inst__;
+	// }
 	virtual ~Network();
 
 	void run();
@@ -22,6 +23,7 @@ public:
 	int connectServer(const char* ip, int port);
 	Packet* getPacket(int fd);
 	Packet* getListen();
+	void breathe(int fps);
 
 private:
 	int epollLoop();
@@ -29,7 +31,6 @@ private:
 	void ctlEvent(int fd, bool flag, PacketType type);
 	void processTcpPackage(int fd);
 	void processBreathe(Packet * packet);
-	void breathe();
 	void newConnect(int fd);
 
 private:
@@ -40,5 +41,5 @@ private:
 	std::map<int,Packet*> PacketMap;
 };
 
-#define network Network::Instance()
+// #define network Network::Instance()
 #endif

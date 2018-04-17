@@ -1,9 +1,10 @@
 #include "server.h"
-#include "../baseServer/luamgr.h"
-#include "../baseServer/network.h"
+#include "luamgr.h"
+#include "network.h"
 // #include "../baseServer/msgmgr.h"
 
 /*******************************************/
+Server* server = NULL;
 bool loop = true;
 void sig_handler( int sig )
 {
@@ -23,9 +24,11 @@ Server::~Server(){
 
 bool Server::init(){
 	// setDaemon();
+	LuaMgr* luaMgr = LuaMgr::Instance();
+	Network* network = Network::Instance();
 
-	luaMgr.init();
-	network.init();
+	luaMgr->init();
+	network->init();
 	return true;
 }
 
@@ -33,9 +36,15 @@ void Server::run(){
 	using namespace std::chrono;
     steady_clock::time_point tpBegin = steady_clock::now();
 
-	luaMgr.start();
-	network.run();
-	int fps = luaMgr.getInt("FPS");
+    LuaMgr* luaMgr = LuaMgr::Instance();
+    Network* network = Network::Instance();
+	std::cout << "isShutDown: "<< luaMgr->isShutDown() << std::endl;
+
+	luaMgr->start();
+	std::cout << "isShutDown: "<< luaMgr->isShutDown() << std::endl;
+	network->run();
+	int fps = luaMgr->getInt("FPS");
+	fps = 60;
 	std::cout << "fps: "<< fps << std::endl;
 	while(true){
         steady_clock::time_point tpNow = steady_clock::now();
@@ -45,14 +54,24 @@ void Server::run(){
 			continue;
 		}        
 		frame++;
-		network.breathe();
-		if(luaMgr.isShutDown)
+		network->breathe(fps);
+		luaMgr->process(frame);
+		if(luaMgr->isShutDown())
 			break;
 	}
 }
 
 bool Server::isQuit(){
-	return loop;
+	if(!loop)
+		std::cout<< "loop quit" << std::endl;
+	return !loop;
+}
+
+Server* Server::Instance(){
+	if(server == NULL){
+		server = new Server();
+	}
+	return server;
 }
 
 void Server::registerHandler(){

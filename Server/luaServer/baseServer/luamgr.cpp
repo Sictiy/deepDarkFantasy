@@ -4,14 +4,24 @@
 // #include "../baseServer/network.h"
 // #include "msgmgr.h"
 #include "network.h"
+#include "server.h"
+
+LuaMgr* luamgr = NULL;
 
 LuaMgr::LuaMgr(){
 	pLuaState = NULL;
-	pState = LUA_NOREF;
-	stateFuncs[lua_load] = LUA_NOREF;
-	stateFuncs[lua_update] = LUA_NOREF;
-	stateFuncs[lua_shutdown] = LUA_NOREF;
 	pShutDown = false;
+	pState = lua_p_load;
+	stateFuncs[lua_p_load] = LUA_NOREF;
+	stateFuncs[lua_p_update] = LUA_NOREF;
+	stateFuncs[lua_p_shutdown] = LUA_NOREF;
+}
+
+LuaMgr* LuaMgr::Instance(){
+	if(luamgr == NULL){
+		luamgr = new LuaMgr();
+	}
+	return luamgr;
 }
 
 LuaMgr::~LuaMgr(){
@@ -20,7 +30,7 @@ LuaMgr::~LuaMgr(){
 
 void LuaMgr::clear(){
 	if(pLuaState){
-		if(auto nRef: stateFuncs){
+		for(auto nRef: stateFuncs){
 			if(nRef != LUA_NOREF){
 				lua_unref(pLuaState,nRef);
 			}
@@ -53,6 +63,10 @@ bool LuaMgr::init(){
     lua_pushcclosure(L,luaSetStateFunc,1);
     lua_setglobal(L,"SetStateFunc");
 
+    lua_pushlightuserdata(L, this);
+    lua_pushcclosure(L, LuaSetErrorFunc, 1);
+    lua_setglobal(L, "SetErrorFunc");
+
 	bool retCode = loadScript("config.lua","Config");
 	if(!retCode)
 		std::cout << "can't find 'config.lua'"<< std::endl;
@@ -60,10 +74,15 @@ bool LuaMgr::init(){
 }
 
 bool LuaMgr::start(){
-	return loadScript("main.lua");
+	bool result = loadScript("main.lua");
+	if(stateFuncs[pState] == LUA_NOREF)
+		pState = lua_p_update;
+	return result;
 }
 
 bool LuaMgr::isShutDown(){
+	if(pShutDown)
+		std::cout << "lua shutdown" << std::endl;
 	return pShutDown;
 }
 
@@ -76,27 +95,30 @@ void LuaMgr::process(int64_t frame){
 
 		lua_getref(L,nRef);
 		lua_pushinteger(L,(lua_Integer)frame);
-		luaCall(L,1,0);
+		luaCall(L,1,1);
 		ret = lua_toboolean(L,-1);
 		lua_settop(L,top);
 	}
-
+	Server* pserver = Server::Instance();
 	switch(pState){
-		case lua_load:
+		case lua_p_load:
 			if(ret)
-				pState = lua_update;
+				pState = lua_p_update;
+			else
+				std::cout << "load failed !" << std::endl;
 			break;
-		case lua_update:
-			if(server.isQuit()){
-				if(stateFuncs[lua_shutdown] != lua_shutdown)
-					pState = lua_shutdown;
+		case lua_p_update:
+			if(pserver->isQuit()){
+				if(stateFuncs[lua_p_shutdown] != LUA_NOREF)
+					pState = lua_p_shutdown;
 				else
 					pShutDown = true;
 			}
 			break;
-		case lua_shutdown:
+		case lua_p_shutdown:
 			if(ret)
 				pShutDown = true;
+			std::cout<< "process shutdown" << std::endl;
 			break;
 	}
 }
@@ -151,10 +173,24 @@ bool LuaMgr::luaCall(lua_State * L, int args, int results){
 	int funcIndex = lua_gettop(L)-args;
 	if(funcIndex <= 0)
 		return false;
-	retCode = lua_pcall(L,args,results,0);
+	int errorIndex = 0;
+	if(errorFunc != LUA_NOREF){
+		lua_getref(L,errorFunc);
+	}else{
+		lua_getglobal(L,"debug");
+		lua_getfield(L,-1,"traceback");
+		lua_remove(L,-2);
+	}
+	errorIndex = funcIndex++;
+
+	retCode = lua_pcall(L,args,results,errorIndex);
 	std::cout << "lua_pcall" << retCode << args << results << 0 << std::endl;
-	if(retCode != 0)
+	if(retCode != 0){
+		const char* errorInfo = lua_tostring(L,-1);
+		if(errorInfo&&errorInfo[0])
+			std::count << errorInfo << std::endl;
 		return false;
+	}
 	return true;
 }
 
@@ -170,6 +206,17 @@ void LuaMgr::setStateFunc(lua_State* L, lua_fState state, int index){
 	}
 }
 
+void LuaMgr::setErrorFunc(lua_State* L,int index){
+	int nRef = errorFunc;
+	if(nRef != LUA_NOREF){
+		lua_unref(L,nRef);
+		errorFunc = LUA_NOREF;
+	}
+	if(lua_isfunction(L,index)){
+		lua_pushvalue(L,index)
+		errorFunc = lua_ref(L,true);
+	}
+}
 /*********************************************function to network*/
 void LuaMgr::recvData(Packet * packet){
 	std::cout << "recvData from: " << packet->getFd() << std::endl; 
@@ -184,6 +231,8 @@ void LuaMgr::recvData(Packet * packet){
 		lua_pushlstring(L,packet->getBuff(),strlen(packet->getBuff()));
 		pushPacket(L,packet);
 		luaCall(L,3,0);
+	}else{
+		std::cout << "can't find function" << std::endl;
 	}
 	lua_settop(L,top);
 }
@@ -199,6 +248,8 @@ void LuaMgr::disConnect(Packet * packet){
 		// lua_pushnumber(L,packet->getFd());
 		pushPacket(L,packet);
 		luaCall(L,1,0);
+	}else{
+		std::cout << "can't find function" << std::endl;
 	}
 	lua_settop(L,top);
 }
@@ -207,7 +258,8 @@ void LuaMgr::newConnect(Packet* packet){
 	std::cout << "newconnect from: " << packet->getFd() << std::endl; 
 	lua_State* L = pLuaState;
 	int top = lua_gettop(L);
-	Packet* listen = network.getListen();
+	Network* network = Network::Instance();
+	Packet* listen = network->getListen();
 	int nRef = listen->getRef();
 	lua_getref(L,nRef);
 	lua_getfield(L,-1,"newConnect");
@@ -215,16 +267,28 @@ void LuaMgr::newConnect(Packet* packet){
 		// lua_pushnumber(L,packet->getFd());
 		pushPacket(L,packet);
 		luaCall(L,1,0);
+	}else{
+		std::cout << "can't find function" << std::endl;
 	}
 	lua_settop(L,top); 
 }
 
 int LuaMgr::getInt(const char* name){
-	return getInt(pLuaState,name);
+	lua_State* L = pLuaState;
+	int top	= lua_gettop(L);
+	lua_getglobal(L,name);
+	int result = lua_tonumber(L,-1);
+	lua_settop(L,top);
+	return result;	
 }
 
 std::string LuaMgr::getString(const char* name){
-	return getString(pLuaState,name);
+	lua_State* L = pLuaState;
+	int top	= lua_gettop(L);
+	lua_getglobal(L,name);
+	std::string string = lua_tostring(L,-1);
+	lua_settop(L,top);
+	return string;
 }
 /*******************************************function to lua*/
 int luaLog(lua_State* L){
@@ -241,13 +305,19 @@ int luaLog(lua_State* L){
 int luaSetStateFunc(lua_State* L){
 	LuaMgr* luamgr = (LuaMgr*)lua_touserdata(L, lua_upvalueindex(1));
 	lua_getfield(L,1,"load");
-	luamgr->setStateFunc(L,lua_load,-1);
+	luamgr->setStateFunc(L,lua_p_load,-1);
 
-	lua_getfield(L,1,"update")
-	luamgr->setStateFunc(L,lua_update,-1);
+	lua_getfield(L,1,"update");
+	luamgr->setStateFunc(L,lua_p_update,-1);
 
-	lua_getfield(L,1,"shutdown")
-	luamgr->setStateFunc(L,lua_shutdown,-1);
+	lua_getfield(L,1,"shutdown");
+	luamgr->setStateFunc(L,lua_p_shutdown,-1);
+	return 0;
+}
+
+int luaSetErrorFunc(lua_State* L){
+	LuaMgr* luamgr = (LuaMgr*)lua_touserdata(L, lua_upvalueindex(1));
+	luamgr->setErrorFunc(L,1);
 	return 0;
 }
 
@@ -256,12 +326,13 @@ int luaConnectServer(lua_State* L){
 	int top = lua_gettop(L);
 	const char* sIp = lua_tostring(L,1);
 	int nPort = lua_tointeger(L,2);
+	Network* network = Network::Instance();
 	int fd = 0;
-	fd = network.connectServer(sIp,nPort);
+	fd = network->connectServer(sIp,nPort);
 	if(fd > 0){
 		std::cout << "connectServer success : [" << sIp<<":"<<nPort<<"] socket: "<< fd<<std::endl;
 	}
-	Packet* packet = network.getPacket(fd);
+	Packet* packet = network->getPacket(fd);
 	pushPacket(L,packet);
 	return 1;
 }
@@ -270,10 +341,11 @@ int luaCreateServer(lua_State* L){
 	int top = lua_gettop(L);
 	const char* sIp = lua_tostring(L,1);
 	int nPort = lua_tointeger(L,2);
-	if(network.createServer(sIp,nPort)){
+	Network* network = Network::Instance();
+	if(network->createServer(sIp,nPort)){
 		std::cout << "createServer success : [" << sIp<<":"<<nPort<<"] "<<std::endl;
 	}
-	Packet* packet = network.getListen();
+	Packet* packet = network->getListen();
 	pushPacket(L,packet);
 	return 1;
 }
@@ -288,23 +360,6 @@ int luaSendData(lua_State* L){
 	return 0;
 }
 /*******************************************function to get data from lua*/
-
-std::string getString(lua_State* L, const char * name){
-	int top	= lua_gettop(L);
-	lua_getglobal(L,name);
-	std::string string = lua_tostring(L,-1);
-	lua_settop(L,top);
-	return string;
-}
-
-int getInt(lua_State* L, const char* name){
-	int top	= lua_gettop(L);
-	lua_getglobal(L,name);
-	int result = lua_tonumber(L,-1);
-	lua_settop(L,top);
-	return result;	
-}
-
 void pushLuaFunction(const char * name ,lua_State* L, Packet* packet, lua_CFunction func){
 	lua_pushstring(L,name);
 	lua_pushlightuserdata(L,packet);
@@ -338,5 +393,5 @@ void pushPacket(lua_State* L, Packet* packet){
 	lua_pushvalue(L,-1);
 	nRef = lua_ref(L,true);
 	packet->setRef(nRef);
-	std::cout << "pushPacket success: " <<nRef << std::endl;
+	std::cout << "pushPacket success: " <<nRef <<  "top: "<<lua_gettop(L)<< std::endl;
 }

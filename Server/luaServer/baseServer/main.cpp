@@ -1,5 +1,5 @@
 #include "server.h"
-#include "../baseServer/Protos.pb.h"
+#include "Protos.pb.h"
 
 using namespace std;
 int main(int argc, char* argv[]){
@@ -10,12 +10,13 @@ int main(int argc, char* argv[]){
 	streambuf* fileBuf = of.rdbuf();
 	cout.rdbuf(fileBuf);
 	
-	Server* server = new Server;
+	Server* server = Server::Instance();
+	// Server* server = new Server();
 
 	if(server->init()){
 		server->run();
 	}
-	std::cout << "init server failed! " << std::endl;
+	std::cout << "server exited! " << std::endl;
 	of.flush();
 	of.close();
 
