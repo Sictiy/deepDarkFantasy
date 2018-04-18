@@ -3,6 +3,7 @@ module(..., package.seeall)
 local server = nil
 local connections = {}
 local connect_count = 0
+local frist = false
 
 function startServer()
 	SetStateFunc{load = load, update = update}
@@ -28,6 +29,13 @@ function load()
 end
 
 function update(frame)
+	if not frist then
+		frist = true
+		local msg = Packer(1,2,3,true)
+		print(msg)
+		print(UnPacker(msg))
+		print("packer success")
+	end
 	return true
 	-- body
 end

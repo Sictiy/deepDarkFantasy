@@ -31,11 +31,11 @@ LuaMgr::~LuaMgr(){
 
 void LuaMgr::clear(){
 	if(pLuaState){
-		for(int nRef: stateFuncs){
-			if(nRef != LUA_NOREF){
-				lua_unref(pLuaState,nRef);
-			}
-		}
+		// for(int nRef: stateFuncs){
+		// 	if(nRef != LUA_NOREF){
+		// 		lua_unref(pLuaState,nRef);
+		// 	}
+		// }
 
 		lua_close(pLuaState);
 		pLuaState = NULL;
@@ -388,7 +388,9 @@ int luaSerialize(lua_State* L){
 	size_t dataLen = 0;
 	unsigned char* data = NULL;
 	packer-> serialize(&data, &dataLen);
+	std::cout << "serialize success : "<< std::bitset<20*8>(data)<<" length : "<<dataLen<< std::endl;
 	lua_pushlstring(L, (const char*)data, dataLen);
+	delete packer;
 	return 1;
 }
 
@@ -399,7 +401,8 @@ int luaUnSerialize(lua_State* L){
 	const char* data = lua_tolstring(L,1,&dataLen);
 	LuaPacker * packer = new LuaPacker();
 	int results = packer->unserilize(L,	(const unsigned char*)data, dataLen);
-	std::cout<< "results: "<<results <<std::endl;
+	std::cout<< "results counts:"<<results <<"data: "<<std::bitset<20*8>(data)<<std::endl;
+	delete packer;
 	return results;
 }
 

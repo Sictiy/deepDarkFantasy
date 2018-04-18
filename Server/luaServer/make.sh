@@ -4,4 +4,4 @@ cmake ../
 make
 
 rm -rf ../bin/*
-cp ./cppBase/App ../bin
+cp ./cppBase/App ../bin/
