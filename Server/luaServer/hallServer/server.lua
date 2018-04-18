@@ -25,16 +25,42 @@ function load()
 	createServer(Config.ServerHost,Config.ServerPort);
 	connectToDbServer(Config.DbHost,Config.DbPort);
 	print("load success")
+	return true
 	-- body
 end
 
 function update(frame)
-	print("update",frame)
+	return true
 	-- body
 end
 
 function shutdown()
 	print("shutdown")
+	return true
+	-- body
+end
+
+function newConnect(packet)
+	print("newConnect",packet)
+	connect_count = 1+ connect_count
+	local connect = {
+		id = connect_count,
+		packet = packet
+	}
+	connections[connect_count] = connect
+	packet.connect = connect
+
+	packet.recvData = recvData
+	packet.disConnect = disConnect
+end
+
+function disConnect(packet)
+	print("disConnect",packet)
+	-- body
+end
+
+function recvData(cmd, data, packet)
+	print("recvData",cmd,data,packet)
 	-- body
 end
 
@@ -60,29 +86,6 @@ function createServer(host,port)
 		print("createServer failed!")
 		os.exit(1)
 	end
-	-- body
-end
-
-function newConnect(packet)
-	print("newConnect",packet)
-	connect_count = 1+ connect_count
-	local connect = {
-		id = connect_count,
-		packet = packet
-	}
-	connections[connect_count] = connect
-	packet.connect = connect
-
-	packet.recvData = recvData
-	packet.disConnect = disConnect
-end
-
-function disConnect(packet)
-	print("disConnect",packet)
-	-- body
-end
-
-function recvData(cmd, data, packet)
-	print("recvData",cmd,data,packet)
+	print(server)
 	-- body
 end

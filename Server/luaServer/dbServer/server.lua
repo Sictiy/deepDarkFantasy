@@ -17,23 +17,24 @@ end
 
 function start()
 	print("start")
-	-- ConnectServer(Config.DbHost,Config.DbPort);
 	-- body
 end
 
 function load()
 	createServer(Config.ServerHost,Config.ServerPort);
 	print("load success")
+	return true
 	-- body
 end
 
 function update(frame)
-	print("update",frame)
+	return true
 	-- body
 end
 
 function shutdown()
 	print("shutdown")
+	return true
 	-- body
 end
 
