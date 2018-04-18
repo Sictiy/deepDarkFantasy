@@ -3,6 +3,5 @@ cd ./build
 cmake ../
 make
 
-rm -f ../hallServer/App
-cp ./baseServer/App ../hallServer
-cp ./baseServer/App ../dbServer
+rm -rf ../bin/*
+cp ./cppBase/App ../bin

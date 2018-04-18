@@ -75,6 +75,7 @@ function connectToDbServer(host,port)
 	else
 		print("connect to db failed!")
 	end
+	print("result",db)
 	-- body
 end
 

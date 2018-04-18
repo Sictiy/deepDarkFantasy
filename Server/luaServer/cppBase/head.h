@@ -2,6 +2,8 @@
 #define __HEAD__
 #include <sys/socket.h>
 #include <sys/epoll.h>
+#include <sys/types.h>
+// #include <boost/cstdfloat.hpp>
 //#include <glog/logging.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -24,6 +26,7 @@
 #include <bitset>
 #include <algorithm>
 #include <fstream>
+#include <cstdint>
 #include <mysql.h>
 
 #define MAXEVENTSIZE  1024

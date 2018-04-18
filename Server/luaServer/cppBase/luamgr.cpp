@@ -15,6 +15,7 @@ LuaMgr::LuaMgr(){
 	stateFuncs[lua_p_load] = LUA_NOREF;
 	stateFuncs[lua_p_update] = LUA_NOREF;
 	stateFuncs[lua_p_shutdown] = LUA_NOREF;
+	errorFunc = LUA_NOREF;
 }
 
 LuaMgr* LuaMgr::Instance(){
@@ -66,6 +67,16 @@ bool LuaMgr::init(){
     lua_pushlightuserdata(L, this);
     lua_pushcclosure(L, luaSetErrorFunc, 1);
     lua_setglobal(L, "SetErrorFunc");
+
+    lua_pushlightuserdata(L,this);
+    lua_pushcclosure(L, luaXCall,1);
+    lua_setglobal(L,"Call");
+
+    lua_pushcfunction(L,luaSerialize);
+    lua_setglobal(L,"Packer");
+
+    lua_pushcfunction(L,luaUnSerialize);
+    lua_setglobal(L,"UnPacker");
 
 	bool retCode = loadScript("config.lua","Config");
 	if(!retCode)
@@ -174,21 +185,17 @@ bool LuaMgr::luaCall(lua_State * L, int args, int results){
 	if(funcIndex <= 0)
 		return false;
 	int errorIndex = 0;
-	if(errorFunc != LUA_NOREF){
-		lua_getref(L,errorFunc);
-	}else{
-		lua_getglobal(L,"debug");
-		lua_getfield(L,-1,"traceback");
-		lua_remove(L,-2);
-	}
-	errorIndex = funcIndex++;
+	// if(errorFunc!= LUA_NOREF){
+	// 	lua_getref(L,errorFunc);
+	// 	errorIndex = -1;
+	// }
 
 	retCode = lua_pcall(L,args,results,errorIndex);
-	std::cout << "lua_pcall" << retCode << args << results << 0 << std::endl;
 	if(retCode != 0){
+		std::cout << "lua_pcall" << retCode << args << results << 0 << std::endl;
 		const char* errorInfo = lua_tostring(L,-1);
 		if(errorInfo&&errorInfo[0])
-			std::cout << errorInfo << std::endl;
+			std::cout <<"errorInfo: "<< errorInfo << std::endl;
 		return false;
 	}
 	return true;
@@ -215,6 +222,7 @@ void LuaMgr::setErrorFunc(lua_State* L,int index){
 	if(lua_isfunction(L,index)){
 		lua_pushvalue(L,index);
 		errorFunc = lua_ref(L,true);
+		std::cout << "set errorFunc success "<< std::endl;
 	}
 }
 /*********************************************function to network*/
@@ -321,6 +329,17 @@ int luaSetErrorFunc(lua_State* L){
 	return 0;
 }
 
+int luaXCall(lua_State* L){
+	int nRet = 0;
+	LuaMgr* luaMgr = (LuaMgr*)lua_touserdata(L,lua_upvalueindex(1));
+	int top = lua_gettop(L);
+	// std::cout<< "top: "<<top << std::endl;
+	if(luaMgr->luaCall(L,top-1,LUA_MULTRET)){
+		nRet = lua_gettop(L);
+	}
+	return nRet;
+}
+
 int luaConnectServer(lua_State* L){
 	std::cout << "start connect server"<< std::endl;
 	int top = lua_gettop(L);
@@ -359,6 +378,31 @@ int luaSendData(lua_State* L){
 	packet->sendData(length,cmd,data);
 	return 0;
 }
+
+int luaSerialize(lua_State* L){
+	int top = lua_gettop(L);
+	if(top <= 0 )
+		return 0;
+	LuaPacker * packer = new LuaPacker();
+	packer-> pushValue(L,1,top);
+	size_t dataLen = 0;
+	unsigned char* data = NULL;
+	packer-> serialize(&data, &dataLen);
+	lua_pushlstring(L, (const char*)data, dataLen);
+	return 1;
+}
+
+int luaUnSerialize(lua_State* L){
+	if(!lua_isstring(L,1))
+		return 0;
+	size_t dataLen = 0;
+	const char* data = lua_tolstring(L,1,&dataLen);
+	LuaPacker * packer = new LuaPacker();
+	int results = packer->unserilize(L,	(const unsigned char*)data, dataLen);
+	std::cout<< "results: "<<results <<std::endl;
+	return results;
+}
+
 /*******************************************function to get data from lua*/
 void pushLuaFunction(const char * name ,lua_State* L, Packet* packet, lua_CFunction func){
 	lua_pushstring(L,name);

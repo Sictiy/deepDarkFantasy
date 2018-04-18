@@ -1,3 +1,7 @@
+package.path = "../?.lua;"..package.path
+
+local table = require "luaBase.table_ex"
+
 oldprint = print
 function print(...)
 	local str = "";

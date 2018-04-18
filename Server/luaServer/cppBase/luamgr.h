@@ -5,6 +5,7 @@
 #include "packet.h"
 #include "iostream"
 #include "server.h"
+#include "luapacker.h"
 
 extern "C"{
 	#include <lua.h>
@@ -56,9 +57,13 @@ void pushPacket(lua_State* L, Packet* packet);
 int luaLog(lua_State* L);
 int luaSetStateFunc(lua_State* L);
 int luaSetErrorFunc(lua_State* L);
+int luaXCall(lua_State* L);
 int luaSendData(lua_State* L);
 int luaCreateServer(lua_State* L);
 int luaConnectServer(lua_State* L);
+
+int luaSerialize(lua_State* L);
+int luaUnSerialize(lua_State* L);
 
 std::string getString(lua_State* L,const char* name);
 int getInt(lua_State* L, const char* name);
