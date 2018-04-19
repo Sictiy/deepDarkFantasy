@@ -7,7 +7,6 @@ extern "C"{
 	#include <lualib.h>
 };
 
-#define float64_t double
 enum valueType {
 	vInteger,
 	vNumber,

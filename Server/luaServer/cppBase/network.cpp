@@ -199,15 +199,12 @@ void Network::run(){
 void Network::processTcpPackage(int fd){
 	std::cout << "get data from:" << fd << std::endl;
 	Packet *packet = PacketMap[fd];
-	LuaMgr* luaMgr = LuaMgr::Instance();
 	switch(packet->addPacket(fd)){
 		case -1:
 			ctlEvent(fd,false,_Client);
 			break;
 		case 1:
 			processBreathe(packet);
-
-			luaMgr->recvData(packet);
 			// Msg msg ;
 			// msg = packet->recvMsg();
 			// if(msg.cmd == breathe_cmd)
@@ -222,8 +219,11 @@ void Network::processTcpPackage(int fd){
 }
 
 void Network::processBreathe(Packet * packet){
+	LuaMgr* luaMgr = LuaMgr::Instance();
 	if(packet->getCmd() == breathe_cmd){
 		packet->breatheGet();
+	}else{
+		luaMgr->recvData(packet);
 	}
 }
 

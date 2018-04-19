@@ -3,9 +3,6 @@
 
 #include "head.h"
 
-// IMPL_LUA_CLASS_BEGIN(Packet)
-// 	EXPORT_LUA_FUNCTION(sendData)
-// IMPL_LUA_CLASS_END()
 extern "C"{
 	#include <lua.h>
 	#include <lauxlib.h>
@@ -22,7 +19,7 @@ class Packet
 public:
 	Packet(int);
 	virtual ~Packet();
-	// DECLARE_LUA_CLASS(Packet);
+	DECLARE_LUA_CLASS(Packet);
 
 	int addPacket(int fd);
 	short getLength();
@@ -37,6 +34,10 @@ public:
 	int getRef();
 	// static void sendMsg(int fd,const Msg *msg);
 	void sendData(short length, short cmd,const char * data);
+
+	int luaGetCmd(lua_State* L);
+	int luaRecvData(lua_State* L);
+	int luaSendData(lua_State* L);
 	// Msg recvMsg();
 
 private:
@@ -54,5 +55,6 @@ private:
 	int nRef;
 	/* data */
 };
+
 
 #endif

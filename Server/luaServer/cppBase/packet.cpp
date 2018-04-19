@@ -1,6 +1,10 @@
 #include "packet.h"
-// IMPL_LUA_CLASS_BEGIN(CPlayer)
-// IMPL_LUA_CLASS_END()
+
+IMPL_LUA_CLASS_BEGIN(Packet)
+	EXPORT_LUA_FUNCTION(luaSendData)
+	EXPORT_LUA_FUNCTION(luaRecvData)
+	EXPORT_LUA_FUNCTION(luaGetCmd)
+IMPL_LUA_CLASS_END()
 
 Packet::Packet(int _fd){
 	fd = _fd;
@@ -56,14 +60,10 @@ int Packet::addPacket(int fd){
 	return 0;
 }
 
-// Msg Packet::recvMsg(){
-// 	Msg msg;
-// 	msg.fd = getFd();
-// 	msg.cmd = getCmd();
-// 	memcpy(msg.buff,getBuff(),strlen(getBuff()));
-// 	bzero(getBuff(),strlen(getBuff()));
-// 	return msg;
-// }
+int Packet::luaRecvData(lua_State* L){
+	lua_pushlstring(L,(const char*)buff,strlen(buff));
+	return 1;
+}
 
 void Packet::sendData(short len, short cmd,const char * data){
 	len += 4;
@@ -79,6 +79,15 @@ void Packet::sendData(short len, short cmd,const char * data){
 	}
 }
 
+int Packet::luaSendData(lua_State* L){
+	if(lua_gettop(L) <= 0)
+		return 0;	
+	short cmd = (short)lua_tonumber(L,1);
+	size_t length = 0;
+	const char* data =lua_tolstring(L,2,&length);
+	sendData(length,cmd,data);
+	return 0;
+}
 // void Packet::sendMsg(int fd,const Msg* msg){
 // 	short len = strlen(msg->buff)+4;
 // 	char * datatoh = new char[len];
@@ -111,6 +120,11 @@ int Packet::getFd(){
 
 short Packet::getCmd(){
 	return cmd;
+}
+
+int Packet::luaGetCmd(lua_State* L){
+	lua_pushinteger(L,cmd);
+	return 1;
 }
 
 bool Packet::needClose(int fps){

@@ -31,9 +31,9 @@ end
 function update(frame)
 	if not frist then
 		frist = true
-		local msg = Packer(1,2,3,true)
+		local msg = Serialize(1,2,3,true,{1,2},{3,4},"fsfs","dddd",11,{key1 = 1, key2 = 2})
 		print(msg)
-		print(UnPacker(msg))
+		print(UnSerialiaze(msg))
 		print("packer success")
 	end
 	return true
@@ -76,7 +76,7 @@ function disConnect(packet)
 	-- body
 end
 
-function recvData(cmd, data, packet)
-	print("recvData",cmd,data,packet)
+function recvData(packet)
+	print("recvData",packet.luaGetCmd(),packet.luaRecvData(),packet)
 	-- body
 end

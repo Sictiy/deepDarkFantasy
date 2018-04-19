@@ -1,14 +1,28 @@
 #ifndef __HEAD__
 #define __HEAD__
+#include "PlatformLinux.h"
+#include "ToolMacros.h"
+// #include "ToolFunctions.h"
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <sys/types.h>
-// #include <boost/cstdfloat.hpp>
+#include <sys/file.h>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
+#include <sys/param.h>
+#include <sys/time.h>
+#include <sys/stat.h>
+#include <sys/select.h>
+#include <sys/mman.h>
+#include <getopt.h>
+#include <dirent.h>
+#include <uuid/uuid.h>
 //#include <glog/logging.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <netdb.h>
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <string.h>
@@ -28,7 +42,26 @@
 #include <algorithm>
 #include <fstream>
 #include <cstdint>
+#include <assert.h>
+#include <float.h>
+#include <errno.h>
+#include <locale.h>
+#include <wchar.h>
+#include <wctype.h>
+#include <mutex>
 #include <mysql.h>
+#include <Luna.h>
+
+// typedef int BOOL;
+// typedef unsigned int DWORD;
+// typedef unsigned short WORD;
+// typedef unsigned char BYTE;
+// typedef double float64_t
+// typedef unsigned long u_long;
+// typedef unsigned long ULONG;
+// typedef void* HANDLE;
+// typedef void* HMODULE;
+// typedef long HRESULT;
 
 #define MAXEVENTSIZE  1024
 #define TIMEWAIT  1000
@@ -55,5 +88,12 @@
 #define	d2h_get 4
 #define h2d_insert 5
 #define d2h_insert 6
+
+struct callStruct{
+	int id;
+	size_t dataLen;
+	unsigned char data[1];
+	/* data */
+};
 
 #endif

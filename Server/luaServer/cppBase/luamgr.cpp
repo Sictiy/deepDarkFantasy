@@ -73,10 +73,10 @@ bool LuaMgr::init(){
     lua_setglobal(L,"Call");
 
     lua_pushcfunction(L,luaSerialize);
-    lua_setglobal(L,"Packer");
+    lua_setglobal(L,"Serialize");
 
     lua_pushcfunction(L,luaUnSerialize);
-    lua_setglobal(L,"UnPacker");
+    lua_setglobal(L,"UnSerialiaze");
 
 	bool retCode = loadScript("config.lua","Config");
 	if(!retCode)
@@ -235,10 +235,10 @@ void LuaMgr::recvData(Packet * packet){
 	lua_getfield(L,-1,"recvData");
 	if(lua_isfunction(L,-1)){
 		// lua_pushnumber(L,packet->getFd());
-		lua_pushnumber(L,packet->getCmd());
-		lua_pushlstring(L,packet->getBuff(),strlen(packet->getBuff()));
+		// lua_pushnumber(L,packet->getCmd());
+		// lua_pushlstring(L,packet->getBuff(),strlen(packet->getBuff()));
 		pushPacket(L,packet);
-		luaCall(L,3,0);
+		luaCall(L,1,0);
 	}else{
 		std::cout << "can't find function" << std::endl;
 	}
@@ -298,6 +298,10 @@ std::string LuaMgr::getString(const char* name){
 	lua_settop(L,top);
 	return string;
 }
+
+lua_State* LuaMgr::getState(){
+	return pLuaState;
+}
 /*******************************************function to lua*/
 int luaLog(lua_State* L){
 	bool retCode = false;
@@ -343,6 +347,8 @@ int luaXCall(lua_State* L){
 int luaConnectServer(lua_State* L){
 	std::cout << "start connect server"<< std::endl;
 	int top = lua_gettop(L);
+	if (top < 0)
+		return 0;
 	const char* sIp = lua_tostring(L,1);
 	int nPort = lua_tointeger(L,2);
 	Network* network = Network::Instance();
@@ -358,6 +364,8 @@ int luaConnectServer(lua_State* L){
 
 int luaCreateServer(lua_State* L){
 	int top = lua_gettop(L);
+	if (top < 0)
+		return 0;
 	const char* sIp = lua_tostring(L,1);
 	int nPort = lua_tointeger(L,2);
 	Network* network = Network::Instance();
@@ -371,6 +379,8 @@ int luaCreateServer(lua_State* L){
 
 int luaSendData(lua_State* L){
 	int top = lua_gettop(L);
+	if (top < 0)
+		return 0;
 	Packet* packet = (Packet*)lua_touserdata(L,lua_upvalueindex(1));
 	short cmd = (short)lua_tonumber(L,1);
 	size_t length = 0;
@@ -388,7 +398,9 @@ int luaSerialize(lua_State* L){
 	size_t dataLen = 0;
 	unsigned char* data = NULL;
 	packer-> serialize(&data, &dataLen);
-	std::cout << "serialize success : "<< std::bitset<20*8>(data)<<" length : "<<dataLen<< std::endl;
+	uint32_t value = 0;
+	memcpy(&value,data+6,4);
+	std::cout << "serialize success : "<< value<<" length : "<<dataLen<< std::endl;
 	lua_pushlstring(L, (const char*)data, dataLen);
 	delete packer;
 	return 1;
@@ -399,9 +411,12 @@ int luaUnSerialize(lua_State* L){
 		return 0;
 	size_t dataLen = 0;
 	const char* data = lua_tolstring(L,1,&dataLen);
+	uint32_t value = 0;
+	memcpy(&value,data+6,4);
+	std::cout << "get data success : "<< value<<" length : "<<dataLen<< std::endl;
 	LuaPacker * packer = new LuaPacker();
 	int results = packer->unserilize(L,	(const unsigned char*)data, dataLen);
-	std::cout<< "results counts:"<<results <<"data: "<<std::bitset<20*8>(data)<<std::endl;
+	std::cout<< "results counts:"<<results <<std::endl;
 	delete packer;
 	return results;
 }
@@ -429,13 +444,14 @@ void pushPacket(lua_State* L, Packet* packet){
 		return;
 	}
 
-	lua_newtable(L);
+	// lua_newtable(L);
 
-	lua_pushstring(L,"__packet");
-	lua_pushlightuserdata(L,packet);
-	lua_rawset(L,-3);
+	// lua_pushstring(L,"__packet");
+	// lua_pushlightuserdata(L,packet);
+	Lua_PushObject(L,packet);
+	// lua_rawset(L,-3);
 
-	pushLuaFunction("SendData",L,packet,luaSendData);
+	// pushLuaFunction("SendData",L,packet,luaSendData);
 
 	lua_pushvalue(L,-1);
 	nRef = lua_ref(L,true);

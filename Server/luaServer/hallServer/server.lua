@@ -4,6 +4,8 @@ local server = nil
 local connections = {}
 local dbs = {}
 local connect_count = 0
+local db_count = 0
+local times = 0
 
 function startServer()
 	SetStateFunc{load = load, update = update}
@@ -30,6 +32,13 @@ function load()
 end
 
 function update(frame)
+	times = times + 1
+	if times > 60 then
+		for i,v in ipairs(dbs) do
+			v.luaSendData(7)
+		end
+		times = 0
+	end
 	return true
 	-- body
 end
@@ -59,8 +68,9 @@ function disConnect(packet)
 	-- body
 end
 
-function recvData(cmd, data, packet)
-	print("recvData",cmd,data,packet)
+function recvData(packet)
+	print("recvData",packet.luaGetCmd(),packet.luaRecvData(),packet)
+	-- print("recvData",cmd,data,packet)
 	-- body
 end
 

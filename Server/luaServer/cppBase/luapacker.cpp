@@ -7,6 +7,10 @@ LuaPacker::LuaPacker(){
 }
 
 LuaPacker::~LuaPacker(){
+	clear();
+}
+
+void LuaPacker::clear(){
 	buff.clear();
 }
 
@@ -15,7 +19,6 @@ void LuaPacker::serialize(unsigned char** data, size_t* dataLen){
 	if(size > 0)
 		*data = &buff[0];
 	*dataLen = size;
-	std::cout << "serialize success : "<<buff[0]<<" length : "<<*dataLen<< std::endl;
 }
 
 bool LuaPacker::isInteger(double d, int i){
@@ -25,6 +28,7 @@ bool LuaPacker::isInteger(double d, int i){
 bool LuaPacker::pushValue(lua_State* L, int dataIndex, int count){
 	if(dataIndex < 0)
 		dataIndex = lua_gettop(L) + dataIndex + 1;
+	std::cout<< "start push value count: " <<count<<std::endl;
 
 	for(int i=0; i< count;i++){
 		int index = dataIndex + i;
@@ -35,9 +39,12 @@ bool LuaPacker::pushValue(lua_State* L, int dataIndex, int count){
 		size_t len = 0;
 		int top = 0;
 		bool isarray = false;
+		bool success = false;
 		const char* pValue = NULL;
+		std::cout<< "type " <<type<<std::endl;
 		switch(type){
 			case LUA_TNUMBER:
+				std::cout<< "start push number" <<std::endl;
 				dvalue = lua_tonumber(L,index);
 				nvalue = (int)dvalue;
 				if(isInteger(dvalue,nvalue)){
@@ -48,15 +55,15 @@ bool LuaPacker::pushValue(lua_State* L, int dataIndex, int count){
 					pushByte(vNumber);
 					pushData((float64_t)dvalue);
 				}
-				std::cout<< "start push number" <<std::endl;
 				break;
 			case LUA_TBOOLEAN:
+				std::cout<< "start push boolean" <<std::endl;
 				bvalue = lua_toboolean(L,index);
 				pushByte(vBoolean);
 				pushData((unsigned char)bvalue);
-				std::cout<< "start push boolean" <<std::endl;
 				break;
 			case LUA_TSTRING:
+				std::cout<< "start push string" <<std::endl;
 				len = 0;
 				pValue = lua_tolstring(L,index,&len);
 				if(len <= USHRT_MAX){
@@ -67,12 +74,12 @@ bool LuaPacker::pushValue(lua_State* L, int dataIndex, int count){
 					pushData((uint32_t)len);
 				}
 				pushBytes((const unsigned char*)pValue,len);
-				std::cout<< "start push string" <<std::endl;
 				break;
 			case LUA_TNIL:
 				pushByte(vNil);
 				break;
 			case LUA_TTABLE:
+				std::cout<< "start push table" <<std::endl;
 				top = lua_gettop(L);
 				lua_getmetatable(L,index);
 				if(lua_istable(L,-1)){
@@ -81,12 +88,14 @@ bool LuaPacker::pushValue(lua_State* L, int dataIndex, int count){
 				}
 				lua_settop(L,top);
 				if(isarray)
-					return pushArray(L,index);
+					success = pushArray(L,index);
 				else
-					return pushTable(L,index);
-				std::cout<< "start push table" <<std::endl;
+					success = pushTable(L,index);
+				if(!success)
+					return false;
 				break;
 			default:
+				std::cout<< "unknown type" <<std::endl;
 				lua_pushfstring(L,"Unknown type (%d) to serialize!", type);
 				lua_error(L);
 				return false;
@@ -171,8 +180,9 @@ const unsigned char* LuaPacker::usValue(lua_State* L, const unsigned char* dataI
 	const unsigned char* index = dataIndex;
 	const unsigned char* end = dataIndex + dataLen;
 	int type = 0;
-	if((size_t)(end - index) >= sizeof(unsigned char))
+	if((size_t)(end - index) < sizeof(unsigned char)){
 		return ret;
+	}
 	type = *index++;
 
 	int value = 0;
@@ -182,7 +192,7 @@ const unsigned char* LuaPacker::usValue(lua_State* L, const unsigned char* dataI
 	uint32_t size = 0;
 	switch(type){
 		case vInteger:
-			if((size_t)(end - index) >= sizeof(int32_t))
+			if((size_t)(end - index) < sizeof(int32_t))
 				return ret;
 			value = *(int32_t*)index;
 			index += sizeof(int32_t);
@@ -190,7 +200,7 @@ const unsigned char* LuaPacker::usValue(lua_State* L, const unsigned char* dataI
 			std::cout<< "get integer" <<std::endl;
 			break;
 		case vNumber:
-			if((size_t)(end - index) >= sizeof(float64_t))
+			if((size_t)(end - index) < sizeof(float64_t))
 				return ret;
 			dvalue = (double)(*(float64_t*)index);
 			index += sizeof(float64_t);
@@ -198,22 +208,22 @@ const unsigned char* LuaPacker::usValue(lua_State* L, const unsigned char* dataI
 			std::cout<< "get number" <<std::endl;
 			break;
 		case vString:
-			if((size_t)(end - index) >= sizeof(uint16_t))
+			if((size_t)(end - index) < sizeof(uint16_t))
 				return ret;
 			len = (size_t)*(uint16_t*)index;
 			index += sizeof(uint16_t);
-			if((size_t)(end - index) >= len)
+			if((size_t)(end - index) < len)
 				return ret;
 			lua_pushlstring(L, (const char*)index, len);
 			index += len;
 			std::cout<< "get string" <<std::endl;
 			break;
 		case vBinary:
-			if((size_t)(end - index) >= sizeof(uint32_t))
+			if((size_t)(end - index) < sizeof(uint32_t))
 				return ret;
 			len = (size_t)*(uint32_t*)index;
 			index += sizeof(uint32_t);
-			if((size_t)(end - index) >= sizeof(uint32_t))
+			if((size_t)(end - index) < sizeof(uint32_t))
 				return ret;
 			lua_pushlstring(L,(const char*)index,len);
 			index += len;
@@ -224,7 +234,7 @@ const unsigned char* LuaPacker::usValue(lua_State* L, const unsigned char* dataI
 			std::cout<< "get nil" <<std::endl;
 			break;
 		case vBoolean:
-			if((size_t)(end - index) >= sizeof(unsigned char))
+			if((size_t)(end - index) < sizeof(unsigned char))
 				return ret;
 			bvalue = (*index != 0);
 			index += sizeof(unsigned char);
@@ -232,11 +242,11 @@ const unsigned char* LuaPacker::usValue(lua_State* L, const unsigned char* dataI
 			std::cout<< "get boolean" <<std::endl;
 			break;
 		case vArray:
-			if((size_t)(end - index) >= sizeof(unsigned char))
+			if((size_t)(end - index) < sizeof(unsigned char))
 				return ret;
 			size = *(uint32_t*)index;
 			index += sizeof(uint32_t);
-			if((size_t)(end - index) >= size)
+			if((size_t)(end - index) < size)
 				return ret;
 			if(!usArray(L,index,size))
 				return ret;
@@ -244,11 +254,11 @@ const unsigned char* LuaPacker::usValue(lua_State* L, const unsigned char* dataI
 			std::cout<< "get array" <<std::endl;
 			break;
 		case vTable:
-			if((size_t)(end - index) >= sizeof(unsigned char))
+			if((size_t)(end - index) < sizeof(unsigned char))
 				return ret;
 			size = *(uint32_t*)index;
 			index += sizeof(uint32_t);
-			if((size_t)(end - index) >= size)
+			if((size_t)(end - index) < size)
 				return ret;
 			if(!usTable(L,index,size))
 				return ret;
