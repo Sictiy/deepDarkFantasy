@@ -211,7 +211,7 @@ void Network::processTcpPackage(int fd){
 			// 	processBreathe(msg);
 			// else
 			// 	msgMgr.addMsg(&msg);
-			// break;
+			break;
 		case 0:
 			std::cout << "wait a new packet" << std::endl;	
 			break;

@@ -6,6 +6,9 @@ MsgQueue::MsgQueue(const char * pName){
 
 MsgQueue::~MsgQueue(){
 	delete 	msgName;
+	for(auto msg : msgs){
+		free(msg);
+	}
 	msgs.clear();
 }
 

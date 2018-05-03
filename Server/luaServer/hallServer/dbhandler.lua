@@ -4,7 +4,7 @@ local Event = require "luaBase.eventdispatcher"
 local command = require "luaBase.command"
 local dbServer = nil
 
-function start()
+function init()
 	connectToDbServer(Config.DbHost,Config.DbPort);
 end
 
@@ -23,11 +23,12 @@ end
 
 function recvData(packet)
 	if packet.luaGetCmd() == command.d2h_request then
-		processRespond(UnSerialiaze(data))
+		processRespond(UnSerialize(packet.luaRecvData()))
 	end
 end
 
 function processRespond(name, method, ...)
+	print("get respond:", name, method)
 	if not dbServer then
 		return 
 	end

@@ -1,52 +1,62 @@
 module(..., package.seeall)
 
+local rank = require "rank"
+local dbHandler = require "dbhandler"
+local command = require "luaBase.command"
+local Event = require "luaBase.eventdispatcher"
+
+
 local server = nil
 local connections = {}
-local dbs = {}
 local connect_count = 0
-local db_count = 0
 local times = 0
 
 function startServer()
+	print("startServer")
 	SetStateFunc{load = load, update = update}
 	init()
 	start()
 end
 
 function init()
+	createServer(Config.ServerHost,Config.ServerPort);
+	dbHandler.init()
 	print("init")
-	-- body
 end
 
 function start()
+	rank.init()
 	print("start")
-	-- body
 end
 
 function load()
-	createServer(Config.ServerHost,Config.ServerPort);
-	connectToDbServer(Config.DbHost,Config.DbPort);
 	print("load success")
 	return true
-	-- body
 end
 
 function update(frame)
 	times = times + 1
-	if times > 60 then
-		for i,v in ipairs(dbs) do
-			v.luaSendData(7)
-		end
+	if times > 600 then
+		dbHandler.breathe()
 		times = 0
 	end
 	return true
-	-- body
 end
 
 function shutdown()
 	print("shutdown")
 	return true
-	-- body
+end
+
+function createServer(host,port)
+	server = CreateServer(host,port)
+	if server then
+		server.newConnect = newConnect
+	else
+		print("createServer failed!")
+		os.exit(1)
+	end
+	print(server)
 end
 
 function newConnect(packet)
@@ -61,42 +71,20 @@ function newConnect(packet)
 
 	packet.recvData = recvData
 	packet.disConnect = disConnect
+
+	--from client
+	rank.sendRank(connect)
 end
 
 function disConnect(packet)
 	print("disConnect",packet)
-	-- body
 end
 
 function recvData(packet)
-	print("recvData",packet.luaGetCmd(),packet.luaRecvData(),packet)
-	-- print("recvData",cmd,data,packet)
-	-- body
+	print("recvData--------------",packet.luaGetCmd())
+	processData(packet.connect,packet.luaGetCmd(),packet.luaRecvData())
 end
 
-function connectToDbServer(host,port)
-	print("start connect to db",host,port)
-	local db = ConnectServer(host,port)
-	if db then 
-		db.recvData = recvData
-		db.disConnect = disConnect
-		print("connect to db success")
-		table.insert(dbs,db)
-	else
-		print("connect to db failed!")
-	end
-	print("result",db)
-	-- body
-end
-
-function createServer(host,port)
-	server = CreateServer(host,port)
-	if server then
-		server.newConnect = newConnect
-	else
-		print("createServer failed!")
-		os.exit(1)
-	end
-	print(server)
-	-- body
+function processData(connect, cmd, data)
+	Event.dispatcher("recvData", connect, cmd, data)
 end

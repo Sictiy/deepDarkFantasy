@@ -45,6 +45,7 @@ private:
 	short cmd;
 	PacketType type;
 	char buff[MAXLEN];
+	short bufflen;
 
 	char cache[MAXLEN];
 	short length;

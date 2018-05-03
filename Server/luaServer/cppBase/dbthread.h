@@ -3,27 +3,35 @@
 #include "head.h"
 #include "luamgr.h"
 
+extern "C"{
+	#include <lua.h>
+	#include <lauxlib.h>
+	#include <lualib.h>
+};
+
 class DbThread
 {
 public:
-	DbThread(arguments);
+	DbThread();
 	~DbThread();
 	DECLARE_LUA_CLASS(DbThread);
 
 	bool init(const char* script_name);
 	bool initLua(const char* script_name);
+	bool initMysql();
 	void clear();
-	MSYQL* getMysql();
+	MYSQL* getMysql();
 
 	int luaPushRequest(lua_State* L);
+	int luaPushQueryResult(lua_State* L, MYSQL_RES* queryRet);
 private:
 	void process();
-	int processRes(callStruct*);
-	int processReq(callStruct*);
+	void processRes(callStruct*);
+	void processReq(callStruct*);
 	bool runing;
 	MsgQueue* reqQueue;
 	MsgQueue* resQueue;
-	std::thread m_process;
+	std::thread* m_process;
 	MYSQL* m_mysql; 
 	/* data */
 };

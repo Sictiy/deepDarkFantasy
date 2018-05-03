@@ -20,7 +20,7 @@
 #include <sys/mman.h>
 #include <getopt.h>
 #include <dirent.h>
-#include <uuid/uuid.h>
+// #include <uuid/uuid.h>
 
 #define DECLSPEC_ALIGN(x) __attribute__((aligned(x)))
 

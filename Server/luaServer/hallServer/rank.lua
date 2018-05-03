@@ -14,6 +14,10 @@ local function getRank(connect,data)
 	role.name = user.name
 	role.score = user.score
 	insertRank(role)
+	sendRank(connect)
+end
+
+function sendRank(connect)
 	local users = userInfo.DataResp()
 	local count = #table
 	if count > 10 then
@@ -54,26 +58,34 @@ local function sendData(connect,data)
 end
 
 local function loadRank()
-	dbHandler.request(role,loadall)
+	print("start load rank")
+	dbHandler.request("role","loadall")
 end
 
-local function onloadall(cmd, data)
+function onloadall(cmd, data)
 	if not cmd == command.ok then
 		print("loadRank failed")
+		return 
 	end
-	roledata = UnSerialiaze(data)
-	print("loadRank success:",roledata)
+	roledata = UnSerialize(data)
+	table.sort(roledata, compFunc)
+	print("loadRank success:",roledata,string.len(data))
 end
 
 --init dispatcher-----------------------------------------------
 function init()
 	Event.addEvent("recvData", _M, "onRecvData")
-	Event.addEvent("onloadall", _M, "onloadall")
+	Event.addEvent("onroleloadall", _M, "onloadall")
 	loadRank()
 end
 
 function onRecvData(connect,cmd,data)
 	if cmd == command.c2s_rank_get then
+		print("get rankdata from client")
 		getRank(connect,data)
 	end
+	-- if cmd == command.c2s_rank_insert then
+	-- 	print("get rankdata from client")
+	-- 	insertRank(connect,data)
+	-- end
 end

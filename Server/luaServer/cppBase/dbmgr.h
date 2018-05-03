@@ -1,4 +1,12 @@
 #pragma once
+#include "head.h"
+#include "dbthread.h"
+
+extern "C"{
+	#include <lua.h>
+	#include <lauxlib.h>
+	#include <lualib.h>
+};
 
 class DbMgr{
 public:

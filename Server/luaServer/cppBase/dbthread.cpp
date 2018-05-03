@@ -2,12 +2,12 @@
 
 IMPL_LUA_CLASS_BEGIN(DbThread)
 	EXPORT_LUA_FUNCTION(luaPushRequest)
-IMPL_LUA_CLASS_END
+IMPL_LUA_CLASS_END()
 
 DbThread::DbThread(){
 	m_process = NULL;
-	resQueue = new MsgQueue();
-	reqQueue = new MsgQueue();
+	resQueue = new MsgQueue("res");
+	reqQueue = new MsgQueue("req");
 	m_mysql = NULL;
 	runing = false;
 }
@@ -21,7 +21,8 @@ bool DbThread::init(const char* script_name){
 		return false;
 	if(!initLua(script_name))
 		return false;
-	m_process = std::thread(&DbThread::process,this);
+	m_process = new std::thread(&DbThread::process,this);
+	return true;
 }
 
 bool DbThread::initLua(const char* script_name){
@@ -40,12 +41,14 @@ bool DbThread::initLua(const char* script_name){
 	lua_pushcclosure(L,luaMysqlSelectDb,1);
 	lua_setglobal(L,"mysqlSelectDb");
 
-	if(!luamgr->loadScript(script_name))
+	if(!luamgr->loadScript(script_name)){
+		std::cout<< "initlua false" <<std::endl;
 		return false;
+	}
 	return true;
 }
 
-bool DbThread::initMysql(const char* script_name){
+bool DbThread::initMysql(){
 	my_bool optOn = true;
 
 	m_mysql = mysql_init(NULL);
@@ -69,7 +72,7 @@ void DbThread::process(){
 		callStruct* respond = NULL;
 		int count = 0;
 		while(true) {
-			request = reqQueue.popMsg();
+			request = reqQueue->popMsg();
 			if(request == NULL)
 				break;
 			processReq(request);
@@ -77,7 +80,7 @@ void DbThread::process(){
 			count++;
 		}
 		while(true) {
-			respond = resQueue.popMsg();
+			respond = resQueue->popMsg();
 			if(respond == NULL)
 				break;
 			processRes(respond);
@@ -95,16 +98,18 @@ void DbThread::processReq(callStruct* request){
 	int top = lua_gettop(L);
 	LuaPacker * packer = new LuaPacker();
 	int paramCount = packer->unserilize(L,(const unsigned char*)request->data,request->dataLen);
+	std::cout << "get request paramcount: "<< paramCount << std::endl;
 	if(!(lua_isstring(L,top+1))){
 		lua_settop(L,top);
 		return ;
 	}
 	lua_pushvalue(L,top+1);
 	lua_gettable(L,LUA_GLOBALSINDEX);
-	if(!(lua_isfunction(L,-1)&&lua_insert(L,top+2))){
+	if(!(lua_isfunction(L,-1))){
 		lua_settop(L,top);
 		return ;
 	}
+	lua_insert(L,top+2);
 	if(!luamgr->luaCall(L,paramCount-1,LUA_MULTRET)){
 		lua_settop(L,top);
 		return ;
@@ -113,6 +118,7 @@ void DbThread::processReq(callStruct* request){
 	packer->clear();
 	if(!packer->pushValue(L,top+2,resultCount)){
 		lua_settop(L,top);
+		std::cout<<"pushValue failed!"<<std::endl;
 		return ;
 	}
 	unsigned char * data = NULL;
@@ -125,7 +131,7 @@ void DbThread::processReq(callStruct* request){
 	respond->dataLen = dataLen;
 	if(dataLen > 0)
 		memcpy(respond->data,data,dataLen);
-	resQueue.pushMsg(respond);
+	resQueue->pushMsg(respond);
 }
 
 void DbThread::processRes(callStruct* respond){
@@ -133,7 +139,7 @@ void DbThread::processRes(callStruct* respond){
 	lua_State* L = luamgr->getState();
 	int top = lua_gettop(L);
 	LuaPacker * packer = new LuaPacker();
-	lua_getObjFunction(L,this,"OnResult");
+	Lua_GetObjFunction(L,this,"onResult");
 	if(lua_isfunction(L,-1)){
 		lua_pushinteger(L,respond->id);
 		lua_pushlstring(L,(const char*)respond->data,respond->dataLen);
@@ -149,7 +155,7 @@ int DbThread::luaPushRequest(lua_State* L){
 	if(data == NULL)
 		return 0;
 	callStruct* request = NULL;
-	request = malloc(sizeof(callStruct)+dataLen);
+	request = (callStruct*)malloc(sizeof(callStruct)+dataLen);
 	request->id = requestId;
 	request->dataLen = dataLen;
 	if(dataLen > 0)
@@ -162,6 +168,7 @@ int DbThread::luaPushRequest(lua_State* L){
 int DbThread::luaPushQueryResult(lua_State* L, MYSQL_RES* queryRet){
 	int row = (int)mysql_num_rows(queryRet);
 	int field = (int)mysql_num_fields(queryRet);
+	std::cout << "quert result: row : "<<row << "field: "<< field <<std::endl; 
 	MYSQL_FIELD* pfields = mysql_fetch_fields(queryRet);
 
 	lua_newtable(L);
@@ -190,7 +197,7 @@ int DbThread::luaPushQueryResult(lua_State* L, MYSQL_RES* queryRet){
 	return 1;
 }
 
-MSYQL* DbThread::getMysql(){
+MYSQL* DbThread::getMysql(){
 	return m_mysql;
 }
 /*******************************/
@@ -201,9 +208,9 @@ int luaMysqlConnect(lua_State* L){
 	int port = (int)lua_tointeger(L,2);
 	const char* user = lua_tostring(L,3);
 	const char* passwd = lua_tostring(L,4);
-	MSYQL* pConnRet = NULL;
+	MYSQL* pConnRet = NULL;
 
-	pConnRet = mysql_real_connect(pmysql,host,user,passwd,"",port,,NULL,CLIENT_FOUND_ROWS | CLIENT_MULTI_STATEMENTS);
+	pConnRet = mysql_real_connect(pmysql,host,user,passwd,"",port,NULL,CLIENT_FOUND_ROWS | CLIENT_MULTI_STATEMENTS);
 	if(pConnRet == NULL){
 		const char* errorInfo = mysql_error(pmysql);
 		std::cout << errorInfo << std::endl;
@@ -221,7 +228,7 @@ int luaMysqlSelectDb(lua_State* L){
 	if( 0 != mysql_select_db(pmysql,dbName)){
 		const char* errorInfo = mysql_error(pmysql);
 		std::cout << errorInfo << std::endl;
-		lua_pushstring(L,errorInfo)
+		lua_pushstring(L,errorInfo);
 		return lua_error(L);
 	}
 	std::cout << "success select db: " <<dbName<< std::endl;
@@ -232,7 +239,7 @@ int luaMysqlQuery(lua_State* L){
 	MYSQL* pmysql = dbthread->getMysql();
 
 	size_t sqlLen = 0;
-	const char* query = lua_tostring(L,1);
+	const char* query = lua_tolstring(L,1,&sqlLen);
 	while(true){
 		if(mysql_real_query(pmysql,query,(unsigned long)sqlLen) == 0)
 			break;
@@ -240,31 +247,31 @@ int luaMysqlQuery(lua_State* L){
 		if(errorNo != CR_SERVER_GONE_ERROR&& errorNo != CR_SERVER_LOST){
 			const char* errorInfo = mysql_error(pmysql);
 			std::cout << errorInfo << std::endl;
-			lua_pushstring(L,errorInfo)
+			lua_pushstring(L,errorInfo);
 			return lua_error(L);
 		}
-	}
-	int pingCount = 0;
-	unsigned long threadId = mysql_thread_id(pmysql);
-	while(true) {
-		pingCount++;
-		int ret = mysql_ping(pmysql);
-		if(ret == 0){
-			unsigned long currentId = mysql_thread_id(pmysql);
-			if(currentId != threadId){
-				std::cout << "reconnected to mysql server" << std::endl;
-				break;
-			}else{
-				std::cout << mysql_error(pmysql) << std::endl;
-			}
+		int pingCount = 0;
+		unsigned long threadId = mysql_thread_id(pmysql);
+		while(true) {
+			pingCount++;
+			int ret = mysql_ping(pmysql);
+			if(ret == 0){
+				unsigned long currentId = mysql_thread_id(pmysql);
+				if(currentId != threadId){
+					std::cout << "reconnected to mysql server" << std::endl;
+					break;
+				}else{
+					std::cout << mysql_error(pmysql) << std::endl;
+				}
 
-			int msCount = 80;
-			if(pingCount > 125){
-				msCount = 1000;
-			}else if(pingCount >135){
-				msCount = 3000;
+				int msCount = 80;
+				if(pingCount > 125){
+					msCount = 1000;
+				}else if(pingCount >135){
+					msCount = 3000;
+				}
+				std::this_thread::sleep_for(std::chrono::milliseconds(msCount));
 			}
-			std::this_thread::sleep_for(std::chrono::milliseconds(msCount));
 		}
 	}
 	int result = 0;
@@ -275,5 +282,6 @@ int luaMysqlQuery(lua_State* L){
 			mysql_free_result(queryRet);
 		}
 	} while(0 == mysql_next_result(pmysql));
+	std::cout << "query msyql success "<< query<< std::endl;
 	return result;
 }

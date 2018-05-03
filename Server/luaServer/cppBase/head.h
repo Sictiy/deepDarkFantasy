@@ -16,7 +16,7 @@
 #include <sys/mman.h>
 #include <getopt.h>
 #include <dirent.h>
-#include <uuid/uuid.h>
+// #include <uuid/uuid.h>
 //#include <glog/logging.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -50,6 +50,8 @@
 #include <wctype.h>
 #include <mutex>
 #include <mysql.h>
+#include <mysql/mysqld_error.h>
+#include <mysql/errmsg.h>
 #include <Luna.h>
 
 // typedef int BOOL;

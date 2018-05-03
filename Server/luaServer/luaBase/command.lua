@@ -8,5 +8,6 @@ return{
 
 	--dh command
 	h2d_request = 0x2001,
+	d2h_request = 0x2002,
 
 }

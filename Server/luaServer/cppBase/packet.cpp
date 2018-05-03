@@ -11,6 +11,7 @@ Packet::Packet(int _fd){
 	cmd = 0;
 	offset = 0;
 	length = MAXLEN;
+	bufflen	= 0;
 	bzero(buff,strlen(buff));
 	bzero(cache,strlen(buff));
 	type = _Server;
@@ -34,7 +35,7 @@ int Packet::addPacket(int fd){
 		// length = cache[0]+(cache[1]<<8);
 		memcpy(&length,cache,2);
 		std::cout << "bufflen :" << length <<"--"<<cache[0]+(cache[1]<<8)<<std::endl;
-		std::cout << "length:" << length << "++" <<std::bitset<16>(length)<< std::endl;
+		// std::cout << "length:" << length << "++" <<std::bitset<16>(length)<< std::endl;
 		//std::cout << "length:" << (unsigned short)cache[0] << "++" <<std::bitset<16>(cache[0])<< std::endl;
 		//std::cout << "length:" << (cache[1]<<8) << "++" <<std::bitset<16>((cache[1]<<8))<< std::endl;
 		// length = cache[0]+(cache[1]<<8);
@@ -44,8 +45,9 @@ int Packet::addPacket(int fd){
 		cmd =cache[2]+(cache[3]<<8);
 		std::cout << "cmd:" << cmd << std::endl;
 		memcpy(buff,cache+4,length-4);
+		bufflen = length-4;
 		// std::cout <<"bufflen:"<< strlen(buff)<<std::endl;
-		std::cout <<"bufflen:"<< strlen(buff)<<std::endl;
+		std::cout <<"bufflen:"<< bufflen<<std::endl;
 		// std::cout <<"buff:"<< buff<<std::endl;
 
 		//add packet to client
@@ -61,7 +63,8 @@ int Packet::addPacket(int fd){
 }
 
 int Packet::luaRecvData(lua_State* L){
-	lua_pushlstring(L,(const char*)buff,strlen(buff));
+	lua_pushlstring(L,(const char*)buff,bufflen);
+	std::cout<<"lua Recv Data: "<<bufflen<<" "<<buff<<std::endl;
 	return 1;
 }
 
@@ -85,6 +88,7 @@ int Packet::luaSendData(lua_State* L){
 	short cmd = (short)lua_tonumber(L,1);
 	size_t length = 0;
 	const char* data =lua_tolstring(L,2,&length);
+	std::cout<<"lua Send Data: "<< cmd << " "<<length<<" "<<data<<std::endl;
 	sendData(length,cmd,data);
 	return 0;
 }

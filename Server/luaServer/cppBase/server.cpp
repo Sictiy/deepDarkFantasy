@@ -1,7 +1,7 @@
 #include "server.h"
 #include "luamgr.h"
 #include "network.h"
-// #include "../baseServer/msgmgr.h"
+#include "dbmgr.h"
 
 /*******************************************/
 Server* server = NULL;
@@ -23,11 +23,12 @@ Server::~Server(){
 }
 
 bool Server::init(){
-	// setDaemon();
 	LuaMgr* luaMgr = LuaMgr::Instance();
 	Network* network = Network::Instance();
+	DbMgr* dbmgr = DbMgr::Instance();
 
 	luaMgr->init();
+	dbmgr->init(luaMgr->getState());
 	network->init();
 	return true;
 }

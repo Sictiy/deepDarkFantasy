@@ -26,6 +26,7 @@ public:
 	void serialize(unsigned char** data, size_t* dataLen);
 	int unserilize(lua_State* L,const unsigned char* dataIndex, size_t dataLen);
 	bool pushValue(lua_State* L, int dataIndex,int count = 1);
+	void clear();
 
 private:
 	bool isInteger(double d, int i);

@@ -12,11 +12,10 @@ DbMgr::~DbMgr(){
 bool DbMgr::init(lua_State* L){
 	lua_pushcfunction(L,luaCreateThread);
 	lua_setglobal(L,"CreateThread");
-	lua_pushcfunction(L,)
 }
 
 void DbMgr::clear(){
-	for(auto dbthrea : threads){
+	for(auto dbthread : threads){
 		delete dbthread;
 	}
 	threads.clear();
@@ -44,5 +43,6 @@ int luaCreateThread(lua_State* L){
 	if(script_name == NULL)
 		return 0;
 	DbThread* newThread= dbmgr->createThread(script_name);
-	return newThread;
+	Lua_PushObject(L,newThread);
+	return 1;
 }

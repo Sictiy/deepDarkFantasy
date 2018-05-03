@@ -1,4 +1,5 @@
-package.path = "../?.lua;./?.lua"..package.path
+package.path = package.path .. ';../protobuf/?.lua;./?.lua;../?.lua'
+package.cpath = package.cpath .. ';../protobuf/?.so'
 local table = require "luaBase.table_ex"
 
 oldprint = print
@@ -21,6 +22,7 @@ function connectMysql(host,prot,user,passwd,db)
 	mysqlConnect(host,prot,user,passwd)
 	mysqlQuery(("create database if not exists %s;"):format(db))
 	mysqlSelectDb(db)
+	print("connectMysql success",db)
 end
 
 function loadModule(modName)
@@ -28,10 +30,12 @@ function loadModule(modName)
 	if mod.init then
 		mod.init()
 	end
+	print("loadModule success",modName)
 end
 
 function callFunc(modName, funcName, ...)
+	print("start call function : ", modName, funcName)
 	local mod = require(modName)
-	local func = mod[func]
+	local func = mod[funcName]
 	return func(...)
 end

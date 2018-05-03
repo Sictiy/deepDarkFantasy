@@ -76,7 +76,7 @@ bool LuaMgr::init(){
     lua_setglobal(L,"Serialize");
 
     lua_pushcfunction(L,luaUnSerialize);
-    lua_setglobal(L,"UnSerialiaze");
+    lua_setglobal(L,"UnSerialize");
 
 	bool retCode = loadScript("config.lua","Config");
 	if(!retCode)
@@ -175,6 +175,7 @@ bool LuaMgr::loadScript(const char * script_name, const char * lua_Name){
 		}
 	}
 	lua_settop(L,top);
+	std::cout << "loadscript success!" << std::endl;
 	return result;
 }
 
@@ -185,12 +186,19 @@ bool LuaMgr::luaCall(lua_State * L, int args, int results){
 	if(funcIndex <= 0)
 		return false;
 	int errorIndex = 0;
-	// if(errorFunc!= LUA_NOREF){
-	// 	lua_getref(L,errorFunc);
-	// 	errorIndex = -1;
-	// }
+	if(errorFunc!= LUA_NOREF){
+		lua_getref(L,errorFunc);
+	}else{
+		lua_getglobal(L,"debug");
+		lua_getfield(L,-1,"traceback");
+		lua_remove(L,-2);
+	}
+	lua_insert(L,funcIndex);
+	errorIndex = funcIndex++;
 
 	retCode = lua_pcall(L,args,results,errorIndex);
+	if(errorIndex != 0)
+		lua_remove(L,errorIndex);
 	if(retCode != 0){
 		std::cout << "lua_pcall" << retCode << args << results << 0 << std::endl;
 		const char* errorInfo = lua_tostring(L,-1);

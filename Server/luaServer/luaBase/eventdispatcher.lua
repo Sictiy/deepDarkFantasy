@@ -40,7 +40,8 @@ function disPatcher(eventName,...)
 	for i,v in ipairs(event) do
 		local func = v.mod[v.func]
 		if func then
-			Call(eventName,...)
+			print("call",eventName)
+			Call(func,...)
 		end
 	end
 end

@@ -41,6 +41,7 @@ public:
 	void recvData(Packet* packet);
 	void newConnect(Packet* packet);
 
+	lua_State* getState();
 	int getInt(const char *);
 	std::string getString(const char *);
 

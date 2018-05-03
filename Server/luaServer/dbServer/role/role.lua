@@ -24,6 +24,7 @@ function loadall()
 		user.name = v[1]
 		user.score = tonumber(v[2])
 		table.insert(data,user)
+		print(user.name,user.score)
 	end
 	return command.ok,Serialize(data)
 end
