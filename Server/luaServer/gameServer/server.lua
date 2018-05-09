@@ -25,11 +25,11 @@ function init()
 end
 
 function start()
+	rank.init()
 	print("start")
 end
 
 function load()
-	rank.init()
 	print("load success")
 	return true
 end

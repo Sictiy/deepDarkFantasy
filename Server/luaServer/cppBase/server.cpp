@@ -42,9 +42,11 @@ void Server::run(){
 	std::cout << "isShutDown: "<< luaMgr->isShutDown() << std::endl;
 
 	luaMgr->start();
+	// setDaemon();
 	std::cout << "isShutDown: "<< luaMgr->isShutDown() << std::endl;
 	network->run();
 	int fps = luaMgr->getInt("FPS");
+	std::cout << "fps: "<< fps << std::endl;
 	fps = 60;
 	std::cout << "fps: "<< fps << std::endl;
 	while(true){

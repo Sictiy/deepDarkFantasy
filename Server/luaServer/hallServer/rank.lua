@@ -69,7 +69,7 @@ function onloadall(cmd, data)
 	end
 	roledata = UnSerialize(data)
 	table.sort(roledata, compFunc)
-	print("loadRank success:",roledata,string.len(data))
+	print("loadRank success:",roledata,string.len(data),#roledata)
 end
 
 --init dispatcher-----------------------------------------------
