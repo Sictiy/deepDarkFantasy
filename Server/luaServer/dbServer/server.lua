@@ -21,9 +21,9 @@ end
 
 function init()
 	createServer(Config.ServerHost,Config.ServerPort);
-	local thread = createThread("role")
+	local thread = createThread("rank")
 	thread.connectMysql(Config.DbHost, Config.DbPort, Config.DbUser, Config.DbPassword, Config.DbName)
-	thread.loadModule("role","role.role")
+	thread.loadModule("rank","rank.rank")
 	print("init")
 end
 

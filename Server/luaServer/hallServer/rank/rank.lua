@@ -45,7 +45,7 @@ end
 local function insertRank(user)
 	table.insert(roledata, user)
 	table.sort(roledata, compFunc)
-	dbHandler.require(role,insert,Serialize(user))
+	dbHandler.require("rank","insert",Serialize(user))
 end
 
 local function sendData(connect,data)
@@ -59,7 +59,7 @@ end
 
 local function loadRank()
 	print("start load rank")
-	dbHandler.request("role","loadall")
+	dbHandler.request("rank","loadall")
 end
 
 function onloadall(cmd, data)
@@ -75,8 +75,15 @@ end
 --init dispatcher-----------------------------------------------
 function init()
 	Event.addEvent("recvData", _M, "onRecvData")
-	Event.addEvent("onroleloadall", _M, "onloadall")
+	Event.addEvent("onrankloadall", _M, "onloadall")
+end
+
+function load()
 	loadRank()
+end
+
+function newconnect(connect)
+	sendRank(connect)
 end
 
 function onRecvData(connect,cmd,data)

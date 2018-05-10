@@ -1,7 +1,8 @@
 module(..., package.seeall)
 
-local rank = require "rank"
+local rank = require "rank.rank"
 local dbHandler = require "dbhandler"
+local gameHandler = require "gamehandler"
 local command = require "luaBase.command"
 local Event = require "luaBase.eventdispatcher"
 
@@ -21,6 +22,7 @@ end
 function init()
 	createServer(Config.ServerHost,Config.ServerPort);
 	dbHandler.init()
+	rank.init()
 	print("init")
 end
 
@@ -29,7 +31,7 @@ function start()
 end
 
 function load()
-	rank.init()
+	rank.load()
 	print("load success")
 	return true
 end
@@ -64,7 +66,8 @@ function newConnect(packet)
 	connect_count = 1+ connect_count
 	local connect = {
 		id = connect_count,
-		packet = packet
+		packet = packet,
+		new = true
 	}
 	connections[connect_count] = connect
 	packet.connect = connect
@@ -82,9 +85,20 @@ end
 
 function recvData(packet)
 	print("recvData--------------",packet.luaGetCmd())
+	local connect = packet.connect
+	if connect and connect.new then
+		connect.new = false
+		print("first connect")
+	end
 	processData(packet.connect,packet.luaGetCmd(),packet.luaRecvData())
 end
 
 function processData(connect, cmd, data)
-	Event.dispatcher("recvData", connect, cmd, data)
+	if cmd = command.c2s_login then
+		print("login")
+	end
+	if connect.roleId ~= nil then
+		Event.dispatcher("recvData", connect, cmd, data)
+	end
+	gameHandler.processData(connect, cmd, data)	
 end
