@@ -1,0 +1,7 @@
+package deepdf;
+message BattleInfo
+{
+  optional uint32 battleId = 1;
+  optional uint32 port = 2;
+  optional string ip = 3;
+}

@@ -76,12 +76,10 @@ function newConnect(packet)
 
 	packet.recvData = recvData
 	packet.disConnect = disConnect
-
-	--from client
-	-- rank.sendRank(connect)
 end
 
 function disConnect(packet)
+	Event.dispatcher("disConnect", packet.connect.id)
 	print("disConnect",packet)
 end
 
@@ -91,10 +89,8 @@ function recvData(packet)
 end
 
 function processData(connect, cmd, data)
-	if cmd == command.c2s_login and connect.id ~= nil then
-		role.login(id, connect, data)
-		print "login"
+	if connect.id ~= nil then
+		Event.dispatcher("recvData", connect, cmd, data)
 	end
 	hallHandler.processData(connect, cmd, data)
-	-- Event.dispatcher("recvData", connect, cmd, data)
 end

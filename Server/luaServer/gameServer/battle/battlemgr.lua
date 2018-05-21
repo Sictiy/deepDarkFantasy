@@ -40,7 +40,7 @@ function getBattleIdByRole(roleid)
 end
 
 function init()
-	Event.addEvent("recvData", _M, recvData)
+	Event.addEvent("recvData", _M, "recvData")
 end
 
 function recvData(id, cmd, data)
@@ -49,4 +49,22 @@ function recvData(id, cmd, data)
 	elseif cmd == c2s_battle_state then
 		setState(roleid, data)
 	end
+end
+-----------------------------------
+function createBattle(data)
+	local roles = {}
+	for k,v in pairs(data) do
+		table.insert(roles, k)
+	end
+	local roomId = roomMgr.createRoom(roles)
+	local battle = Battle:create(roomId,roles)
+	Battle[roomId] = battle
+	for k,v in pairs(roles) do
+		roleMgr.login(v)
+		bindRole(v, battle:getBattleId())
+	end
+end
+
+function joinBattle(connect, data)
+	
 end

@@ -14,6 +14,10 @@ function addRole(roleId)
 		return
 	end
 	table.insert(Rooms[room],roleId)
+	if #Rooms[room] >= 20 then
+		print("removeroom",room)
+		removeRoom(room)
+	end
 end
 
 function findRoom()

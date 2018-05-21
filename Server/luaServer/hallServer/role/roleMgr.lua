@@ -3,13 +3,17 @@ module(...,package.seeall)
 local Event = require "luaBase.eventdispatcher"
 local command = require "luaBase.command"
 local dbHandler = require "dbhandler"
+local LoginPb = require "Login_pb"
 
 require "role.role"
 
 Roles = {}
 
-function login(id, connect)
-	Roles[id] = Role:create(id, connect)
+function login(connect, data)
+	local reuqest = LoginPb.AccountInfo()
+	local id = request.id
+	local name = request.name
+	Roles[id] = Role:create(id, name, connect)
 	dbHandler.request("role","load",id)
 	return Roles[id] ~= nil and 1 or 0
 end
@@ -60,8 +64,18 @@ end
 ----------------------------------------------------init
 function init()
 	Event.addEvent("recvData", _M, "onRecvData")
+	Event.addEvent("disConnect",_M, "disConnect")
 	Event.addEvent()
 end
 
 function onRecvData(connect, cmd, data)
+
+end
+
+function disConnect(connect)
+	local role = getRole(connect.roleId)
+	if role ~= nil then
+		role:dispose
+	end
+	Roles[connect.roleId] = nil
 end

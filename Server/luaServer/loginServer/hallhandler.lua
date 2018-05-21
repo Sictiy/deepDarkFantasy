@@ -27,7 +27,6 @@ function processData(connect, cmd, data)
 			minCount = connectNum
 			min = index
 		end
-	-- elseif cmd ==  then
 	end
 end
 

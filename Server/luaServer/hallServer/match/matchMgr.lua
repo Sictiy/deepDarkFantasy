@@ -6,6 +6,8 @@ local Event = require "luaBase.eventdispatcher"
 local command = require "luaBase.command"
 local gameHandler = require "gamehandler"
 
+require "Battle_pb"
+
 function distributeBattle(connect, data)
 	local response = Battle_pb.BattleInfo()
 	response.ip = gameHandler.getIp()
@@ -19,7 +21,7 @@ function distributeBattle(connect, data)
 		if not role then
 			print("can't find role",v)
 		end
-		roleData[v] = role:getRoleBase():SerializeToString()
+		roleData[v] = role:getRoleBase()
 	end
 	connect.packet.luaSendData(command.h2g_role_data,Serialize(roleData))
 	for k, v in pairs(data) do 

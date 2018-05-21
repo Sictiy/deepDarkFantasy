@@ -6,7 +6,6 @@ local Config = require "config"
 local loginServer = nil
 
 function init()
-	-- Event.addEvent("onrecvdata")
 	connectToLoginServer(Config.LoginHost,Config.LoginPort)
 	print("init")
 end
@@ -24,13 +23,18 @@ function connectToLoginServer(host,port)
 	print("result",loginServer)
 end
 
+function registHall(num,ip,port)
+	localServer.lusSendData(command.h2l_regist,Serialize(num,ip,port))
+end
+
 function recvData(packet)
-	-- if packet.luaGetCmd() == command.d2h_request then
-	-- 	processRespond(UnSerialize(packet.luaRecvData()))
-	-- end
-	print(packet)
+	print("recvData-----",packet.luaGetCmd())
+	processData(packet.connect, packet.luaGetCmd(), packet.luaRecvData())
+end
+
+function processData(connect, cmd, data)
 end
 
 function disConnect(packet)
-	print(packet)
+	Event.dispatcher("disConnect",packet.connect)
 end

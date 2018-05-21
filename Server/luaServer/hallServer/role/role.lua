@@ -12,14 +12,14 @@ function Role:new()
 	return self
 end
 
-function Role:create(id, connect)
+function Role:create(id, name, connect)
 	local self = Role:new()
 
 	self.roleId = id
 	connect.roleId = id
 	self.connect = connect
 	self.roomId = nil
-	self.nickName = "user"..tostring(id)
+	self.nickName = name
 
 	if not self:init() then
 		self:dispose()
@@ -40,6 +40,16 @@ function Role:dispose()
 	self:save()
 end
 --------------------------------------------------
+function Role:getRoleBase()
+	local role = {}
+	role.nickName = self.nickName
+	role.icon = self.icon
+	role.gender = self.gender
+	role.level = self.level
+	role.gold = self.gold
+	return role
+end
+
 function Role:getName()
 	return self.nickName
 end

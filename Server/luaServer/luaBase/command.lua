@@ -2,11 +2,13 @@ return{
 	--db command
 	ok = 0x1000,
 	account_not_exists = 0x1001,
+	account_exists = 0x1002,
 	--cs command
 	c2s_rank_get  = 1,
 	s2c_rank_get  = 2,
 
 	c2s_login = 0x3001,
+	s2c_login = 0x3003,
 	s2c_role_data = 0x3002,
 	c2s_battle_search = 0x3101,
 	s2c_battle_search = 0x3102,
@@ -19,4 +21,7 @@ return{
 	g2h_regist = 0x4001,
 	g2h_battle = 0x4002,
 	h2g_battle = 0x4003,
+
+	h2l_regist = 0x5001,
+	l2h_regist = 0x5002,
 }

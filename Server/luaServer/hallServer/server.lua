@@ -1,10 +1,15 @@
 module(..., package.seeall)
 
 local rank = require "rank.rank"
+local matchMgr = require "match.matchMgr"
+local roleMgr = require "role.roleMgr"
+
 local dbHandler = require "dbhandler"
+local loginHandler = require "loginhandler"
 local gameHandler = require "gamehandler"
 local command = require "luaBase.command"
 local Event = require "luaBase.eventdispatcher"
+local LoginPb = require "Login_pb"
 
 
 local server = nil
@@ -22,11 +27,15 @@ end
 function init()
 	createServer(Config.ServerHost,Config.ServerPort);
 	dbHandler.init()
+	loginHandler.init()
 	rank.init()
+	roleMgr.init()
+	matchMgr.init()
 	print("init")
 end
 
 function start()
+	loginHandler.regist(connect_count,Config.ServerHost,Config.ServerPort)
 	print("start")
 end
 
@@ -95,6 +104,10 @@ end
 
 function processData(connect, cmd, data)
 	if cmd = command.c2s_login then
+		local request = LoginPb.AccountInfo()
+		request:ParseFromString(data)
+		connect.roleId = request.id
+		roleMgr.login(connect, data)
 		print("login")
 	end
 	if connect.roleId ~= nil then

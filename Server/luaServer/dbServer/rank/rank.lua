@@ -33,7 +33,7 @@ function insert(data)
 	local user = UnSerialiaze(data)
 	local sql = {}
 	table.insert(sql,string.format("insert into user(name,score) value("))
-	table.insert(sql,string.format("'%s',%d",user.name,user.score))
+	table.insert(sql,string.format("'%s',%d)",user.name,user.score))
 	local cmd = table.concat(sql)
 	print("1. insert into user: ",cmd)
 	mysqlQuery(cmd)

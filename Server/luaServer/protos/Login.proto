@@ -1,0 +1,15 @@
+package deepdf;
+message AccountInfo
+{
+  optional string name = 1;
+  optional string passwd = 2;
+  optional uint32 id = 3;
+}
+
+message LoginRes
+{
+  optional bool result = 1;
+  optional uint32 port = 2;
+  optional string host = 3;
+  optional uint32 id = 4;
+}
