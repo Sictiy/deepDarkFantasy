@@ -1,18 +1,19 @@
 module(..., package.seeall)
 
 local command = require "luaBase.command"
-local matchMgr = require "match.matchMgr"
 
-GameSvr = {}
+Halls = {}
 local index = 0
+local min = 0
+local minCount = 0
 
 function processData(connect, cmd, data)
-	if cmd = g2h_regist then
+	if cmd == h2l_regist then
 		print("regist game server")
 		local connectNum, ip, port = UnSerialize(data)
 		if not connect.index then
 			connect.index = index
-			GameSvr[index] = {
+			Halls[index] = {
 				connect = connect,
 				connectNum = connectNum,
 				ip = ip,
@@ -20,17 +21,17 @@ function processData(connect, cmd, data)
 			}
 			index = index + 1
 		else
-			GameSvr[index].connectNum = connectNum
+			Halls[index].connectNum = connectNum
 		end
-	elseif cmd = g2h_battle then
-		print("distribute battle")
-		matchMgr.distributeBattle(connect, data)
+		if connectNum <= minCount or minCount = 0 then
+			minCount = connectNum
+			min = index
+		end
+	-- elseif cmd ==  then
 	end
 end
 
-function disposeServer(index)
-	if GameSvr[index].connect ~= nil then
-		print("dispose Server",index)
-	end
-	GameSvr[index] = nil
+function getHall()
+	local hall = Halls[min]
+	return hall.ip, hall.port
 end

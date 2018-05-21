@@ -86,5 +86,7 @@ function recvData(packet)
 end
 
 function processData(connect, cmd, data)
-	Event.dispatcher("recvData", connect, cmd, data)
+	if connect.id ~= nil then
+		Event.dispatcher("recvData", connect, cmd, data)
+	end
 end

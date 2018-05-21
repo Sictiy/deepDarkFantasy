@@ -1,9 +1,11 @@
 module(..., package.seeall)
 
-local rank = require "rank"
+-- local rank = require "rank"
 local dbHandler = require "dbhandler"
+local hallHandler = require "hallhandler"
 local command = require "luaBase.command"
 local Event = require "luaBase.eventdispatcher"
+local role = require "role"
 
 
 local server = nil
@@ -21,11 +23,13 @@ end
 function init()
 	createServer(Config.ServerHost,Config.ServerPort);
 	dbHandler.init()
+	-- hallHandler.init()
+	role.init()
 	print("init")
 end
 
 function start()
-	rank.init()
+	-- rank.init()
 	print("start")
 end
 
@@ -64,7 +68,8 @@ function newConnect(packet)
 	connect_count = 1+ connect_count
 	local connect = {
 		id = connect_count,
-		packet = packet
+		packet = packet,
+		newFlag = true,
 	}
 	connections[connect_count] = connect
 	packet.connect = connect
@@ -73,7 +78,7 @@ function newConnect(packet)
 	packet.disConnect = disConnect
 
 	--from client
-	rank.sendRank(connect)
+	-- rank.sendRank(connect)
 end
 
 function disConnect(packet)
@@ -86,5 +91,10 @@ function recvData(packet)
 end
 
 function processData(connect, cmd, data)
-	Event.dispatcher("recvData", connect, cmd, data)
+	if cmd == command.c2s_login and connect.id ~= nil then
+		role.login(id, connect, data)
+		print "login"
+	end
+	hallHandler.processData(connect, cmd, data)
+	-- Event.dispatcher("recvData", connect, cmd, data)
 end

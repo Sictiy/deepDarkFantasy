@@ -39,7 +39,27 @@ end
 function Role:dispose()
 	self:save()
 end
+--------------------------------------------------
+function Role:getName()
+	return self.nickName
+end
 
+function Role:getIcon()
+	return self.icon
+end
+
+function Role:getGender()
+	return self.gender
+end
+
+function Role:getLevel()
+	return self.level
+end
+
+function Role:getGold()
+	return self.gold
+end
+--------------------------------------------------
 function Role:save()
 	local data = {}
 	data.nickName = self.nickName

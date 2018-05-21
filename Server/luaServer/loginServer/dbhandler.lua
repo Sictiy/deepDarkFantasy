@@ -2,7 +2,6 @@ module(...,package.seeall)
 
 local Event = require "luaBase.eventdispatcher"
 local command = require "luaBase.command"
-local Config = require "config"
 local dbServer = nil
 
 function init()
@@ -45,8 +44,4 @@ end
 
 function breathe()
 	dbServer.luaSendData(7)
-end
-
-function disConnect(packet)
-	print(packet)
 end
